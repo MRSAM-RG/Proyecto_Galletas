@@ -1,0 +1,176 @@
+/* Estilos específicos para la gestión de pedidos (admin/pedidos.php) */
+
+.navbar {
+    background: #fff0f3;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 2rem;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.logo img {
+    height: 38px;
+    width: 38px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #ff92b2;
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+}
+.nav-links a {
+    color: #a14a7f;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.15rem;
+    transition: color 0.2s;
+}
+.nav-links a:hover {
+    color: #ff92b2;
+}
+.pedido-box {
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom:2rem;
+    padding:1.5rem;
+}
+.pedido-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1rem;
+    flex-wrap:wrap;
+    gap:10px;
+}
+.pedido-header span {
+    font-weight:500;
+}
+.detalle-table {
+    width:100%;
+    margin-top:1rem;
+    border-collapse:collapse;
+}
+.detalle-table th, .detalle-table td {
+    padding:0.5rem;
+    border:1px solid #eee;
+    text-align:left;
+}
+.detalle-table th {
+    background:#fcd5e4;
+    color:#a14a7f;
+}
+.btn-completar, .filtro-form button {
+    background: #ff92b2;
+    color: #a14a7f;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(161,74,127,0.08);
+}
+.btn-completar:hover, .filtro-form button:hover {
+    background: #a14a7f;
+    color: #fff;
+}
+.success {
+    background:#e0ffe0;
+    color:#007e00;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+.error {
+    background:#ffe0e0;
+    color:#d10000;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+.filtro-form {
+    margin-bottom:2rem;
+}
+.filtro-form select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+/* --- RESPONSIVIDAD ADMIN --- */
+@media (max-width: 900px) {
+    .login-container {
+        max-width: 98vw !important;
+        padding: 18px !important;
+    }
+    table, .detalle-table {
+        font-size: 0.95rem;
+    }
+    .pedido-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+}
+@media (max-width: 700px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 1rem 0.5rem;
+    }
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .login-container {
+        padding: 10px !important;
+        min-width: 90vw;
+    }
+    .pedido-box {
+        padding: 0.7rem;
+    }
+    .detalle-table th, .detalle-table td {
+        padding: 0.3rem;
+    }
+}
+@media (max-width: 520px) {
+    .login-container {
+        padding: 4px !important;
+        min-width: 98vw;
+        border-radius: 0;
+    }
+    .pedido-header span {
+        font-size: 0.95rem;
+    }
+    .detalle-table, table {
+        font-size: 0.85rem;
+    }
+    .pedido-header {
+        gap: 2px;
+    }
+    .btn-completar, .filtro-form button {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 1rem;
+    }
+    .logo img {
+        height: 30px;
+        width: 30px;
+    }
+}
+/* --- FIN RESPONSIVIDAD ADMIN --- */ 

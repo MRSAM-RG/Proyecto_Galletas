@@ -1,0 +1,114 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
+                url('../assets/img/fondo.jpg') center/cover no-repeat;
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Animación decorativa como en el hero */
+body::before,
+body::after {
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: float 10s infinite linear;
+    z-index: 0;
+}
+
+body::before {
+    top: 20%;
+    left: -100px;
+}
+body::after {
+    bottom: 10%;
+    right: -100px;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+.login-container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: black;
+}
+
+input[type="email"],
+input[type="text"],
+input[type="password"] 
+input[type="number"],
+textarea {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 105, 180, 0.8);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: white;
+    color: rgba(255, 105, 180, 0.8);
+}
+
+.error {
+    background-color: #ffe0e0;
+    color: #d10000;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+a {
+    color: rgba(255, 105, 180, 0.8);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.success {
+    background-color: #e0ffe0;
+    color: #007e00;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
