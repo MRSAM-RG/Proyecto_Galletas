@@ -55,41 +55,15 @@ $db->desconectar();
             background: #ff92b2;
             color: #fff;
         }
-        .navbar {
-            background: #fff0f3 !important;
-        }
-        .nav-links a {
-            color: #a14a7f !important;
-        }
-        .nav-links a:hover {
-            color: #ff92b2 !important;
-        }
-        .logo span {
-            color: #a14a7f !important;
-        }
-        @media (max-width: 700px) {
-            .navbar {
-                flex-direction: column;
-                gap: 10px;
-                padding: 1rem 0.5rem;
-                align-items: flex-start;
-            }
-            .nav-links {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">
+<nav class="custom-navbar">
+        <div class="custom-logo">
             <img src="../../assets/img/logo.png" alt="Logo Empresa">
             <a href="../index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
         </div>
-        <ul class="nav-links">
+        <ul class="custom-nav-links">
             <li><a href="admin.php">Admin</a></li>
             <li><a href="../carrito.php">Carrito</a></li>
             <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
