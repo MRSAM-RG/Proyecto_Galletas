@@ -49,7 +49,9 @@ $db->desconectar();
         </ul>
     </nav>
 
-    <header class="hero">
+    <header class="hero innovador">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
         <div class="hero-content">
             <h1>¡Bienvenido a la Galería de Galletas!</h1>
             <p>Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
@@ -83,7 +85,7 @@ $db->desconectar();
                 <div class="product-grid">
                     <?php while ($producto = $result->fetch_assoc()): ?>
                         <div class="product-card">
-                            <img src="../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" style="width:400px;height:400px;object-fit:cover;display:block;margin:auto;">
+                            <img src="../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" style="width:400px;height:400px;object-fit:cover;display:block">
                             <h3><?php echo htmlspecialchars_decode($producto['nombre']); ?></h3>
                             <p><?php echo htmlspecialchars_decode($producto['descripcion']); ?></p>
                             <p class="precio"><?= '$' . number_format($producto['precio'], 0, ',', '.') ?></p>
