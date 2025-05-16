@@ -96,7 +96,7 @@ $db->desconectar();
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                     <li><a href="admin/admin.php">Admin</a></li>
                 <?php endif; ?>
-                <li><a href="carrito.php">Carrito</a></li>
+                <li><a href="carrito.php">Carrito <span id="cart-count" class="cart-count"></span></a></li>
                 <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
             <?php else: ?>
                 <li><a href="login.php">Iniciar Sesión</a></li>
@@ -130,7 +130,7 @@ $db->desconectar();
                     </div>
                     <div style="text-align:right;margin-top:2rem;">
                         <h2>Total: $<?php echo number_format($total, 2); ?></h2>
-                        <button type="button" onclick="document.getElementById('direccionModal').style.display='block'">Proceder al Pago</button>
+                        <button type="button" onclick="document.getElementById('direccionModal').style.display='block'">Procesar Pedido</button>
                     </div>
                     <!-- Modal de dirección -->
                     <div id="direccionModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;align-items:center;justify-content:center;">
@@ -175,6 +175,19 @@ $db->desconectar();
     document.getElementById('hamburger-btn').addEventListener('click', function() {
         document.querySelector('.nav-links').classList.toggle('open');
     });
+    </script>
+    <script>
+    // Actualiza el contador del carrito
+    function updateCartCount() {
+        var cartCount = document.getElementById('cart-count');
+        if (!cartCount) return;
+        fetch('carrito.php?count=1')
+            .then(res => res.json())
+            .then(data => {
+                cartCount.textContent = data.count > 0 ? '(' + data.count + ')' : '';
+            });
+    }
+    updateCartCount();
     </script>
 </body>
 </html>

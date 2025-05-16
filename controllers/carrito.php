@@ -45,14 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nueva_cantidad = $carrito_item['cantidad'] + $cantidad;
         
         if ($queryManager->updateCartItem($carrito_item['id'], $nueva_cantidad)) {
-            header('Location: ../views/index.php?success=Producto actualizado en el carrito');
+            header('Location: ../views/index.php?added=1');
         } else {
             header('Location: ../views/index.php?error=Error al actualizar el carrito');
         }
     } else {
         // Insertar nuevo
         if ($queryManager->addToCart($usuario_id, $producto_id, $cantidad, $tamano, $presentacion)) {
-            header('Location: ../views/index.php?success=Producto agregado al carrito');
+            header('Location: ../views/index.php?added=1');
         } else {
             header('Location: ../views/index.php?error=Error al agregar al carrito');
         }

@@ -156,5 +156,53 @@ $db->desconectar();
 document.getElementById('hamburger-btn').addEventListener('click', function() {
     document.querySelector('.nav-links').classList.toggle('open');
 });
+// Mostrar toast si el producto fue agregado
+if (window.location.search.includes('added=1')) {
+    var toast = document.getElementById('toast');
+    if (toast) {
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+}
+// Actualiza el contador del carrito
+function updateCartCount() {
+    var cartCount = document.getElementById('cart-count');
+    if (!cartCount) return;
+    fetch('carrito.php?count=1')
+        .then(res => res.json())
+        .then(data => {
+            cartCount.textContent = data.count > 0 ? '(' + data.count + ')' : '';
+        });
+}
+updateCartCount();
+// AJAX para agregar al carrito sin recargar
+if (document.querySelectorAll('.add-cart-form').length) {
+    document.querySelectorAll('.add-cart-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            fetch('../controllers/carrito.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Error al agregar al carrito');
+                return res.text();
+            })
+            .then(() => {
+                var toast = document.getElementById('toast');
+                if (toast) {
+                    toast.style.display = 'block';
+                    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                }
+                updateCartCount();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .catch(() => {
+                alert('Hubo un error al agregar el producto al carrito.');
+            });
+        });
+    });
+}
 </script>
 </html>

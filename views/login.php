@@ -32,7 +32,7 @@ if (isset($_SESSION['usuario_id'])) {
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                     <li><a href="admin/admin.php">Admin</a></li>
                 <?php endif; ?>
-                <li><a href="carrito.php">Carrito</a></li>
+                <li><a href="carrito.php">Carrito <span id="cart-count" class="cart-count"></span></a></li>
                 <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
             <?php else: ?>
                 <li><a href="login.php">Iniciar Sesión</a></li>
@@ -63,5 +63,17 @@ if (isset($_SESSION['usuario_id'])) {
 document.getElementById('hamburger-btn').addEventListener('click', function() {
     document.querySelector('.nav-links').classList.toggle('open');
 });
+
+// Actualiza el contador del carrito
+function updateCartCount() {
+    var cartCount = document.getElementById('cart-count');
+    if (!cartCount) return;
+    fetch('carrito.php?count=1')
+        .then(res => res.json())
+        .then(data => {
+            cartCount.textContent = data.count > 0 ? '(' + data.count + ')' : '';
+        });
+}
+updateCartCount();
 </script>
 </html>
