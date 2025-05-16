@@ -35,6 +35,11 @@ $db->desconectar();
             <img src="../../assets/img/logo.png" alt="Logo Empresa">
             <a href="index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
         </div>
+        <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <ul class="nav-links">
             <?php if (isset($_SESSION['usuario_id'])): ?>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
@@ -147,4 +152,9 @@ $db->desconectar();
     </footer>
     <div id="toast" class="toast" style="display:none;position:fixed;top:90px;right:30px;z-index:9999;background:#a14a7f;color:#fff;padding:16px 28px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);font-size:1.1rem;">Producto agregado al carrito</div>
 </body>
+<script>
+document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.querySelector('.nav-links').classList.toggle('open');
+});
+</script>
 </html>

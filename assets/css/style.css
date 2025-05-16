@@ -700,3 +700,47 @@ h1, h2, h3, h4, h5, h6 {
         padding: 2rem 0;
     }
 }
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 38px;
+    height: 38px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+}
+.hamburger span {
+    display: block;
+    height: 4px;
+    width: 100%;
+    background: #ff92b2;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: #fcd5e4;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        padding: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        z-index: 1000;
+    }
+    .nav-links.open {
+        display: flex;
+    }
+    .navbar {
+        position: relative;
+    }
+}

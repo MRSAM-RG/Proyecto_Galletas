@@ -30,6 +30,11 @@ $db->desconectar();
             <img src="../../assets/img/logo.png" alt="Logo Empresa">
             <a href="../index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
         </div>
+        <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <ul class="nav-links">
             <li><a href="admin.php">Admin</a></li>
             <li><a href="../carrito.php">Carrito</a></li>
@@ -66,4 +71,9 @@ $db->desconectar();
         </table>
     </div>
 </body>
+<script>
+document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.querySelector('.nav-links').classList.toggle('open');
+});
+</script>
 </html> 
