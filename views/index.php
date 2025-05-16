@@ -112,6 +112,30 @@ $db->desconectar();
             </div>
         </section>
     </main>
+    <section class="contact-section">
+        <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
+            <h2 style="text-align: center; color: #c2185b; margin-bottom: 2rem;">Contáctanos</h2>
+            <form id="contactForm" action="../controllers/contact.php" method="POST" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+                <div style="margin-bottom: 1rem;">
+                    <label for="name" style="display: block; margin-bottom: 0.5rem; color: #333;">Nombre</label>
+                    <input type="text" id="name" name="name" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="email" style="display: block; margin-bottom: 0.5rem; color: #333;">Email</label>
+                    <input type="email" id="email" name="email" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="subject" style="display: block; margin-bottom: 0.5rem; color: #333;">Asunto</label>
+                    <input type="text" id="subject" name="subject" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="message" style="display: block; margin-bottom: 0.5rem; color: #333;">Mensaje</label>
+                    <textarea id="message" name="message" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; min-height: 150px;"></textarea>
+                </div>
+                <button type="submit" style="background: #c2185b; color: white; padding: 1rem 2rem; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1rem;">Enviar Mensaje</button>
+            </form>
+        </div>
+    </section>
     <footer class="footer">
         <div class="social-icons">
             <a href="#"><img src="../assets/img/instagram.png" alt="Instagram"></a>
@@ -122,48 +146,5 @@ $db->desconectar();
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
     </footer>
     <div id="toast" class="toast" style="display:none;position:fixed;top:90px;right:30px;z-index:9999;background:#a14a7f;color:#fff;padding:16px 28px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);font-size:1.1rem;">Producto agregado al carrito</div>
-    <script>
-    // Toast de éxito
-    function showToast(msg, isError = false) {
-        var t = document.getElementById('toast');
-        t.textContent = msg;
-        t.style.backgroundColor = isError ? '#dc3545' : '#a14a7f';
-        t.style.display = 'block';
-        setTimeout(function(){ t.style.display = 'none'; }, 1220);
-    }
-    // Interceptar formularios de agregar al carrito
-    var forms = document.querySelectorAll('.add-cart-form');
-    forms.forEach(function(form){
-        form.addEventListener('submit', function(e){
-            e.preventDefault();
-            var data = new FormData(form);
-            fetch(form.action, {method:'POST', body:data})
-            .then(r=>r.text())
-            .then(response=>{
-                if(response.includes('success')) {
-                    showToast('Producto agregado al carrito');
-                    actualizarCarrito();
-                } else if(response.includes('error')) {
-                    showToast('Error al agregar al carrito', true);
-                }
-            })
-            .catch(error => {
-                showToast('Error al procesar la solicitud', true);
-            });
-        });
-    });
-    // Actualizar numerito del carrito
-    function actualizarCarrito() {
-        fetch('carrito.php?count=1')
-        .then(r=>r.json())
-        .then(d=>{
-            document.getElementById('cart-count').textContent = d.count>0 ? d.count : '';
-        })
-        .catch(error => {
-            console.error('Error al actualizar el carrito:', error);
-        });
-    }
-    document.addEventListener('DOMContentLoaded', actualizarCarrito);
-    </script>
 </body>
 </html>
