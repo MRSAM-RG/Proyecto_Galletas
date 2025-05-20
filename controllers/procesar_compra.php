@@ -53,6 +53,24 @@ foreach ($carrito as $item) {
         $item['tamano'], 
         $item['presentacion']
     );
+    // Calcular cantidad real a descontar según presentación
+    $descontar = ($item['presentacion'] === 'paquete3') ? $item['cantidad'] * 3 : $item['cantidad'];
+    // Validar stock antes de descontar
+    $stmt_check = $db->conexion->prepare("SELECT stock FROM stock_productos WHERE producto_id = ? AND tamano = ?");
+    $stmt_check->bind_param('is', $item['producto_id'], $item['tamano']);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
+    $row_stock = $result_check->fetch_assoc();
+    $stock_actual = $row_stock ? intval($row_stock['stock']) : 0;
+    if ($stock_actual < $descontar) {
+        $db->desconectar();
+        header('Location: ../views/carrito.php?error=Stock insuficiente para "' . $item['nombre'] . '" (' . $item['tamano'] . ')');
+        exit();
+    }
+    // Descontar stock solo si hay suficiente
+    $stmt = $db->conexion->prepare("UPDATE stock_productos SET stock = stock - ? WHERE producto_id = ? AND tamano = ? AND stock >= ?");
+    $stmt->bind_param('iisi', $descontar, $item['producto_id'], $item['tamano'], $descontar);
+    $stmt->execute();
 }
 
 // Vaciar carrito

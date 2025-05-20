@@ -55,6 +55,14 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
                 <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="Ej: 25000 (25.000)">
             </div>
             <div class="form-group">
+                <label for="stock_normal">Stock Normal:</label>
+                <input type="number" name="stock_normal" id="stock_normal" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="stock_jumbo">Stock Jumbo:</label>
+                <input type="number" name="stock_jumbo" id="stock_jumbo" min="0" required>
+            </div>
+            <div class="form-group">
                 <label for="imagen">Imagen</label>
                 <input type="file" id="imagen" name="imagen" accept="image/*" required onchange="previewImg(event)">
                 <div id="preview" style="margin-top:10px;"></div>

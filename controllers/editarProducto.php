@@ -37,6 +37,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($queryManager->updateProduct($id, $nombre, $descripcion, $precio, $factor_diferencial, $imagen)) {
+        // Actualizar stock si se enviaron los campos
+        if (isset($_POST['stock_normal']) && isset($_POST['stock_jumbo'])) {
+            $stock_normal = intval($_POST['stock_normal']);
+            $stock_jumbo = intval($_POST['stock_jumbo']);
+            // Actualizar stock normal
+            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'normal'");
+            $stmt_stock->bind_param('ii', $stock_normal, $id);
+            $stmt_stock->execute();
+            // Actualizar stock jumbo
+            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'jumbo'");
+            $stmt_stock->bind_param('ii', $stock_jumbo, $id);
+            $stmt_stock->execute();
+        }
         header('Location: ../views/admin/admin.php?success=Producto actualizado correctamente');
     } else {
         if ($imagen) {
