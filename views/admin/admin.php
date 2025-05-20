@@ -36,6 +36,11 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
     <br><br>
     <div class="login-container" style="max-width:600px;">
         <h1>Panel de Administración</h1>
+        <?php if (isset($_GET['error'])): ?>
+            <div class="error">
+                <?php echo htmlspecialchars($_GET['error']); ?>
+            </div>
+        <?php endif; ?>
         <ul style="list-style:none;padding:0;margin:2rem 0;">
             <li style="margin-bottom:1.5rem;"><a href="productos.php" style="font-size:1.2rem;">Gestión de Productos</a></li>
             <li style="margin-bottom:1.5rem;"><a href="pedidos.php" style="font-size:1.2rem;">Ver Pedidos</a></li>

@@ -52,7 +52,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
             </div>
             <div class="form-group">
                 <label for="precio">Precio</label>
-                <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="Ej: 25.000">
+                <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="Ej: 25000 (25.000)">
             </div>
             <div class="form-group">
                 <label for="imagen">Imagen</label>
