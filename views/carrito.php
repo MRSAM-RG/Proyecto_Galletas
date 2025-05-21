@@ -207,7 +207,6 @@ $db->desconectar();
                                 <label for="telefono">Número de teléfono:</label>
                                 <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" style="width:100%;margin:12px 0 18px 0;padding:10px;border-radius:8px;border:1px solid #ccc;" placeholder="Ej: 1234567890">
                                 <div style="display:flex;gap:1rem;justify-content:flex-end;">
-                                    <button type="button" onclick="document.getElementById('direccionModal').style.display='none'" style="background:#eee;color:#a14a7f;">Cancelar</button>
                                     <button type="submit">Confirmar Pedido</button>
                                 </div>
                             </form>

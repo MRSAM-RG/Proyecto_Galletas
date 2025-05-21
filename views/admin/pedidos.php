@@ -18,12 +18,19 @@ $queryManager = new QueryManager($db);
 
 // Obtener pedidos y detalles
 $pedidos = $queryManager->getAllOrders($estado);
-$detalles = $queryManager->getAllOrderDetails();
-
-// Agrupar detalles por pedido_id
-$mapa_detalles = [];
-while ($row = $detalles->fetch_assoc()) {
-    $mapa_detalles[$row['pedido_id']][] = $row;
+if ($pedidos === false) {
+    $error = "Error al obtener los pedidos. Por favor, intente nuevamente.";
+} else {
+    $detalles = $queryManager->getAllOrderDetails();
+    if ($detalles === false) {
+        $error = "Error al obtener los detalles de los pedidos. Por favor, intente nuevamente.";
+    } else {
+        // Agrupar detalles por pedido_id
+        $mapa_detalles = [];
+        while ($row = $detalles->fetch_assoc()) {
+            $mapa_detalles[$row['pedido_id']][] = $row;
+        }
+    }
 }
 
 $db->desconectar();
@@ -82,6 +89,9 @@ $db->desconectar();
             <br>
             <button type="submit">Filtrar</button>
         </form>
+        <?php if (isset($error)): ?>
+            <div class="error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
         <?php if (isset($_GET['success'])): ?>
             <div class="success"><?php echo htmlspecialchars($_GET['success']); ?></div>
         <?php endif; ?>

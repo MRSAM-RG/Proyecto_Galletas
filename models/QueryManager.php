@@ -110,10 +110,6 @@ class QueryManager {
     public function addToCart($usuario_id, $producto_id, $cantidad, $tamano, $presentacion) {
         $stmt = $this->db->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, tamano, presentacion) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("iiiss", $usuario_id, $producto_id, $cantidad, $tamano, $presentacion);
-        if (!$stmt->execute()) {
-            die("Error al insertar en carrito: " . $stmt->error);
-        }
-        return true;
         return $stmt->execute();
     }
 
@@ -146,15 +142,34 @@ class QueryManager {
     // ====== PEDIDOS ======
     public function createOrder($usuario_id, $direccion, $telefono) {
         $stmt = $this->db->conexion->prepare("INSERT INTO pedidos (usuario_id, fecha, estado, direccion, telefono) VALUES (?, NOW(), 'pendiente', ?, ?)");
+        if (!$stmt) {
+            error_log('Error al preparar la consulta de creación de pedido: ' . $this->db->conexion->error);
+            return false;
+        }
+        
         $stmt->bind_param("iss", $usuario_id, $direccion, $telefono);
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            error_log('Error al ejecutar la creación del pedido: ' . $stmt->error);
+            return false;
+        }
+        
         return $this->db->conexion->insert_id;
     }
 
     public function addOrderDetail($pedido_id, $producto_id, $cantidad, $precio, $tamano, $presentacion) {
         $stmt = $this->db->conexion->prepare("INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio, tamano, presentacion) VALUES (?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            error_log('Error al preparar la consulta de detalle de pedido: ' . $this->db->conexion->error);
+            return false;
+        }
+        
         $stmt->bind_param("iiidss", $pedido_id, $producto_id, $cantidad, $precio, $tamano, $presentacion);
-        return $stmt->execute();
+        if (!$stmt->execute()) {
+            error_log('Error al ejecutar la inserción del detalle del pedido: ' . $stmt->error);
+            return false;
+        }
+        
+        return true;
     }
 
     public function getOrderById($id) {
@@ -199,22 +214,36 @@ class QueryManager {
     public function getAllOrders($estado = null) {
         if ($estado && $estado !== 'todos') {
             $stmt = $this->db->conexion->prepare("
-                SELECT p.*, u.nombre AS usuario 
+                SELECT p.*, COALESCE(u.nombre, 'Usuario Eliminado') AS usuario 
                 FROM pedidos p 
-                JOIN usuarios u ON p.usuario_id = u.id 
+                LEFT JOIN usuarios u ON p.usuario_id = u.id 
                 WHERE p.estado = ? 
                 ORDER BY p.fecha DESC
             ");
+            if (!$stmt) {
+                error_log('Error al preparar la consulta de pedidos filtrados: ' . $this->db->conexion->error);
+                return false;
+            }
+            
             $stmt->bind_param("s", $estado);
         } else {
             $stmt = $this->db->conexion->prepare("
-                SELECT p.*, u.nombre AS usuario 
+                SELECT p.*, COALESCE(u.nombre, 'Usuario Eliminado') AS usuario 
                 FROM pedidos p 
-                JOIN usuarios u ON p.usuario_id = u.id 
+                LEFT JOIN usuarios u ON p.usuario_id = u.id 
                 ORDER BY p.fecha DESC
             ");
+            if (!$stmt) {
+                error_log('Error al preparar la consulta de todos los pedidos: ' . $this->db->conexion->error);
+                return false;
+            }
         }
-        $stmt->execute();
+        
+        if (!$stmt->execute()) {
+            error_log('Error al ejecutar la consulta de pedidos: ' . $stmt->error);
+            return false;
+        }
+        
         return $stmt->get_result();
     }
 
@@ -224,7 +253,16 @@ class QueryManager {
             FROM detalle_pedido d 
             JOIN productos pr ON d.producto_id = pr.id
         ");
-        $stmt->execute();
+        if (!$stmt) {
+            error_log('Error al preparar la consulta de detalles de pedidos: ' . $this->db->conexion->error);
+            return false;
+        }
+        
+        if (!$stmt->execute()) {
+            error_log('Error al ejecutar la consulta de detalles de pedidos: ' . $stmt->error);
+            return false;
+        }
+        
         return $stmt->get_result();
     }
 } 
