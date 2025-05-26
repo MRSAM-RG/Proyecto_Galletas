@@ -81,6 +81,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("ssds", $nombre, $descripcion, $precio, $nombreImagen);
     
     if ($stmt->execute()) {
+        // Obtener el ID del producto recién insertado
+        $producto_id = $stmt->insert_id;
+        // Obtener los valores de stock desde el formulario
+        $stock_normal = isset($_POST['stock_normal']) ? intval($_POST['stock_normal']) : 0;
+        $stock_jumbo = isset($_POST['stock_jumbo']) ? intval($_POST['stock_jumbo']) : 0;
+        // Insertar stock para tamaño normal
+        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'normal', ?)");
+        $stmt_stock->bind_param('ii', $producto_id, $stock_normal);
+        $stmt_stock->execute();
+        // Insertar stock para tamaño jumbo
+        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'jumbo', ?)");
+        $stmt_stock->bind_param('ii', $producto_id, $stock_jumbo);
+        $stmt_stock->execute();
         header('Location: ../views/admin/admin.php?success=Producto agregado correctamente');
     } else {
         // Si hay error, eliminar la imagen subida

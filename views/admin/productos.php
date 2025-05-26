@@ -13,6 +13,14 @@ $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
 $productos = $queryManager->getAllProducts(false);
+// Obtener stock de todos los productos
+$stocks = [];
+$result_stock = $db->conexion->query("SELECT producto_id, tamano, stock FROM stock_productos");
+while ($row = $result_stock->fetch_assoc()) {
+    $pid = $row['producto_id'];
+    $tam = $row['tamano'];
+    $stocks[$pid][$tam] = $row['stock'];
+}
 $db->desconectar();
 ?>
 <!DOCTYPE html>
@@ -44,31 +52,37 @@ $db->desconectar();
     <div class="login-container" style="max-width:900px;">
         <h1>Gestión de Productos</h1>
         <a href="../admin/agregarProducto.php" class="btn" style="margin-bottom:1.5rem;display:inline-block;">+ Agregar Producto</a>
-        <table>
-            <thead>
-                <tr>
-                    <th>Imagen</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($producto = $productos->fetch_assoc()): ?>
-                <tr>
-                    <td><img src="../../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="img" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></td>
-                    <td><?php echo htmlspecialchars_decode($producto['nombre']); ?></td>
-                    <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
-                    <td><?= '$' . number_format($producto['precio'], 0, ',', '.') ?></td>
-                    <td>
-                        <a href="editarProducto.php?id=<?php echo $producto['id']; ?>">Editar</a> |
-                        <a href="../../controllers/eliminarProducto.php?id=<?php echo $producto['id']; ?>" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+        
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Stock Normal</th>
+                        <th>Stock Jumbo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($producto = $productos->fetch_assoc()): ?>
+                    <tr>
+                        <td><img src="../../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="img" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></td>
+                        <td><?php echo htmlspecialchars_decode($producto['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
+                        <td><?= '$' . number_format($producto['precio'], 0, ',', '.') ?></td>
+                        <td><?= isset($stocks[$producto['id']]['normal']) ? $stocks[$producto['id']]['normal'] : 0 ?></td>
+                        <td><?= isset($stocks[$producto['id']]['jumbo']) ? $stocks[$producto['id']]['jumbo'] : 0 ?></td>
+                        <td>
+                            <a href="editarProducto.php?id=<?php echo $producto['id']; ?>">Editar</a> |
+                            <a href="../../controllers/eliminarProducto.php?id=<?php echo $producto['id']; ?>" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+
     </div>
 </body>
 <script>

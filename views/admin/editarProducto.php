@@ -17,6 +17,17 @@ $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
 $producto = $queryManager->getProductById($_GET['id']);
+// Obtener stock actual para ambos tamaños
+$stock_normal = 0;
+$stock_jumbo = 0;
+$stmt = $db->conexion->prepare("SELECT tamano, stock FROM stock_productos WHERE producto_id = ?");
+$stmt->bind_param("i", $_GET['id']);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    if ($row['tamano'] === 'normal') $stock_normal = $row['stock'];
+    if ($row['tamano'] === 'jumbo') $stock_jumbo = $row['stock'];
+}
 $db->desconectar();
 if (!$producto) {
     header('Location: admin.php?error=Producto no encontrado');
@@ -60,6 +71,12 @@ if (!$producto) {
 
             <label>Precio:</label><br>
             <input type="number" step="0.01" name="precio" value="<?= $producto['precio'] ?>" required><br><br>
+
+            <label>Stock Normal:</label><br>
+            <input type="number" name="stock_normal" min="0" value="<?= $stock_normal ?>" required><br><br>
+
+            <label>Stock Jumbo:</label><br>
+            <input type="number" name="stock_jumbo" min="0" value="<?= $stock_jumbo ?>" required><br><br>
 
             <label>Imagen (dejar vacío para mantener actual):</label><br>
             <input type="file" name="imagen" accept="image/*"><br><br>

@@ -28,6 +28,7 @@ $db->desconectar();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galería de Galletas</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -180,26 +181,55 @@ if (document.querySelectorAll('.add-cart-form').length) {
             const formData = new FormData(form);
             fetch('../controllers/carrito.php', {
                 method: 'POST',
-                body: formData
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Error al agregar al carrito');
-                return res.text();
-            })
-            .then(() => {
-                var toast = document.getElementById('toast');
-                if (toast) {
-                    toast.style.display = 'block';
-                    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-                updateCartCount();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    var toast = document.getElementById('toast');
+                    if (toast) {
+                        toast.style.display = 'block';
+                        setTimeout(() => { 
+                            toast.style.display = 'none';
+                            window.location.reload();
+                        }, 1200);
+                    } else {
+                        window.location.reload();
+                    }
+                    updateCartCount();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '¡Stock insuficiente!',
+                        text: data.error || 'No hay suficiente stock disponible para este producto.',
+                        confirmButtonColor: '#a14a7f'
+                    });
+                }
             })
             .catch(() => {
-                alert('Hubo un error al agregar el producto al carrito.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un error al agregar el producto al carrito.',
+                    confirmButtonColor: '#a14a7f'
+                });
             });
         });
     });
 }
 </script>
+<?php if (isset($_GET['stock_error'])): ?>
+<script>
+Swal.fire({
+    icon: 'error',
+    title: '¡Stock insuficiente!',
+    text: 'No hay suficiente stock disponible para este producto.',
+    confirmButtonColor: '#a14a7f'
+});
+</script>
+<?php endif; ?>
 </html>

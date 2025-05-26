@@ -53,6 +53,7 @@ $db->desconectar();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - Galletas</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
     <style>
         .btn-eliminar {
             background-color: #dc3545;
@@ -67,16 +68,62 @@ $db->desconectar();
         .btn-eliminar:hover {
             background-color: #c82333;
         }
-        .product-card {
-            position: relative;
-            padding-bottom: 60px;
+        .cart-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            padding: 2rem 1.5rem;
+            max-width: 100%;
+            overflow-x: unset;
         }
-        .product-card p {
-            margin: 5px 0;
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0 0 0;
         }
-        .product-card .precio {
+        .cart-table th, .cart-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .cart-table img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .cart-table .precio {
             color: #a14a7f;
             font-weight: bold;
+        }
+        @media (max-width: 900px) {
+            .cart-card {
+                padding: 1rem 0.5rem;
+                overflow-x: auto;
+            }
+            .cart-table {
+                min-width: 700px;
+            }
+            .cart-table th, .cart-table td {
+                padding: 0.5rem;
+                font-size: 0.95rem;
+            }
+            .cart-table img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        @media (max-width: 600px) {
+            .cart-card {
+                padding: 0.5rem 0.2rem;
+            }
+            .cart-table {
+                min-width: 500px;
+            }
         }
     </style>
 </head>
@@ -111,22 +158,40 @@ $db->desconectar();
                 <?php if (empty($carrito_items)): ?>
                     <div class="error" style="margin:2rem 0;">Tu carrito está vacío. <a href="index.php">Ver productos</a></div>
                 <?php else: ?>
-                    <div class="product-grid">
-                        <?php foreach ($carrito_items as $item): ?>
-                            <div class="product-card">
-                                <img src="../assets/img/<?php echo htmlspecialchars($item['imagen']); ?>" alt="<?php echo htmlspecialchars($item['nombre']); ?>">
-                                <h3><?php echo htmlspecialchars_decode($item['nombre']); ?></h3>
-                                <p><strong>Tamaño:</strong> <?php echo ucfirst($item['tamano']); ?></p>
-                                <p><strong>Presentación:</strong> <?php echo $item['presentacion'] === 'unidad' ? 'Unidad' : 'Paquete de 3'; ?></p>
-                                <p><strong>Cantidad:</strong> <?php echo $item['cantidad']; ?></p>
-                                <p class="precio"><strong>Precio unitario:</strong> <?= '$' . number_format($item['precio'], 0, ',', '.') ?></p>
-                                <p class="precio"><strong>Subtotal:</strong> <?= '$' . number_format($item['precio'] * $item['cantidad'], 0, ',', '.') ?></p>
-                                <form action="../controllers/eliminarCarrito.php" method="POST" style="margin-top: 1rem;">
-                                    <input type="hidden" name="carrito_id" value="<?php echo $item['id']; ?>">
-                                    <button type="submit" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este producto del carrito?')">Eliminar del carrito</button>
-                                </form>
-                            </div>
-                        <?php endforeach; ?>
+                    <div class="cart-card" style="background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.10);padding:2rem 1.5rem;overflow-x:auto;max-width: 100%;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Imagen</th>
+                                    <th>Tamaño</th>
+                                    <th>Presentación</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($carrito_items as $item): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars_decode($item['nombre']); ?></td>
+                                        <td><img src="../assets/img/<?php echo htmlspecialchars($item['imagen']); ?>" alt="<?php echo htmlspecialchars($item['nombre']); ?>"></td>
+                                        <td><?php echo ucfirst($item['tamano']); ?></td>
+                                        <td><?php echo $item['presentacion'] === 'unidad' ? 'Unidad' : 'Paquete de 3'; ?></td>
+                                        <td><?php echo $item['cantidad']; ?></td>
+                                        <td class="precio"><?= '$' . number_format($item['precio'], 0, ',', '.') ?></td>
+                                        <td class="precio"><?= '$' . number_format($item['precio'] * $item['cantidad'], 0, ',', '.') ?></td>
+                                        <td>
+                                            <form action="../controllers/eliminarCarrito.php" method="POST" class="delete-form">
+                                                <input type="hidden" name="carrito_id" value="<?php echo $item['id']; ?>">
+                                                <button type="button" class="btn-eliminar">Eliminar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                     <div style="text-align:right;margin-top:2rem;">
                         <h2>Total: $<?php echo number_format($total, 2); ?></h2>
@@ -136,37 +201,17 @@ $db->desconectar();
                     <div id="direccionModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;align-items:center;justify-content:center;">
                         <div style="background:#fff;padding:2rem 2.5rem;border-radius:16px;max-width:400px;margin:auto;position:relative;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
                             <h2>Dirección de Envío</h2>
-                            <form action="../controllers/procesar_compra.php" method="POST" onsubmit="return validarDireccion()">
+                            <form action="../controllers/procesar_compra.php" method="POST" onsubmit="return validarDireccion(event)">
                                 <label for="direccion">Dirección completa:</label>
                                 <input type="text" id="direccion" name="direccion" required style="width:100%;margin:12px 0 18px 0;padding:10px;border-radius:8px;border:1px solid #ccc;">
                                 <label for="telefono">Número de teléfono:</label>
                                 <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" style="width:100%;margin:12px 0 18px 0;padding:10px;border-radius:8px;border:1px solid #ccc;" placeholder="Ej: 1234567890">
                                 <div style="display:flex;gap:1rem;justify-content:flex-end;">
-                                    <button type="button" onclick="document.getElementById('direccionModal').style.display='none'" style="background:#eee;color:#a14a7f;">Cancelar</button>
                                     <button type="submit">Confirmar Pedido</button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <script>
-                    function validarDireccion() {
-                        var dir = document.getElementById('direccion').value.trim();
-                        var tel = document.getElementById('telefono').value.trim();
-                        if (dir.length < 5) {
-                            alert('Por favor ingresa una dirección válida.');
-                            return false;
-                        }
-                        if (!/^[0-9]{10}$/.test(tel)) {
-                            alert('Por favor ingresa un número de teléfono válido de 10 dígitos.');
-                            return false;
-                        }
-                        return true;
-                    }
-                    // Cerrar modal con Escape
-                    window.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape') document.getElementById('direccionModal').style.display = 'none';
-                    });
-                    </script>
                 <?php endif; ?>
             </div>
         </section>
@@ -176,6 +221,8 @@ $db->desconectar();
         document.querySelector('.nav-links').classList.toggle('open');
     });
     </script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
     // Actualiza el contador del carrito
     function updateCartCount() {
@@ -188,6 +235,73 @@ $db->desconectar();
             });
     }
     updateCartCount();
+
+    // Agregar event listeners a todos los botones de eliminar
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btn-eliminar').forEach(button => {
+            button.addEventListener('click', function() {
+                const form = this.closest('form');
+                
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: '¿Deseas eliminar este producto del carrito?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+
+    function validarDireccion(event) {
+        event.preventDefault();
+        var dir = document.getElementById('direccion').value.trim();
+        var tel = document.getElementById('telefono').value.trim();
+        
+        if (dir.length < 5) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor ingresa una dirección válida.',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return false;
+        }
+        if (!/^[0-9]{10}$/.test(tel)) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor ingresa un número de teléfono válido de 10 dígitos.',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return false;
+        }
+
+        // Si la validación es exitosa, mostrar confirmación y enviar el formulario
+        Swal.fire({
+            title: '¡Pedido Confirmado!',
+            text: 'Tu pedido ha sido procesado correctamente.',
+            icon: 'success',
+            confirmButtonColor: '#a14a7f'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelector('form').submit();
+            }
+        });
+        return false;
+    }
+
+    // Cerrar modal con Escape
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') document.getElementById('direccionModal').style.display = 'none';
+    });
     </script>
 </body>
 </html>
