@@ -61,6 +61,11 @@ class QueryManager {
     }
 
     public function deleteProduct($id) {
+        // Eliminar de stock_productos
+        $stmt0 = $this->db->conexion->prepare("DELETE FROM stock_productos WHERE producto_id = ?");
+        $stmt0->bind_param("i", $id);
+        $stmt0->execute();
+
         // Eliminar primero del carrito
         $stmt1 = $this->db->conexion->prepare("DELETE FROM carrito WHERE producto_id = ?");
         $stmt1->bind_param("i", $id);

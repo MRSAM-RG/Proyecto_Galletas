@@ -1,7 +1,19 @@
 /* Estilos específicos para la gestión de pedidos (admin/pedidos.php) */
 
+/* Paleta Dulce Tentación */
+:root {
+  --rosa-logo: #ff92b2;
+  --amarillo-logo: #ffe066;
+  --celeste-logo: #4edfff;
+  --lila-logo: #b48fff;
+  --naranja-logo: #ffb366;
+  --fondo-claro: #fff8f6;
+  --fondo-navbar: #fcd5e4;
+  --acento-oscuro: #a14a7f;
+}
+
 .custom-navbar {
-    background: #fff0f3;
+    background: var(--fondo-navbar);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -20,7 +32,7 @@
     object-fit: contain;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid #ff92b2;
+    border: 2px solid var(--rosa-logo);
 }
 .custom-nav-links {
     list-style: none;
@@ -30,14 +42,14 @@
     padding: 0;
 }
 .custom-nav-links a {
-    color: #a14a7f;
+    color: var(--lila-logo);
     font-weight: bold;
     text-decoration: none;
     font-size: 1.15rem;
     transition: color 0.2s;
 }
 .custom-nav-links a:hover {
-    color: #ff92b2;
+    color: var(--rosa-logo);
 }
 .pedido-box {
     background:#fff;
@@ -68,12 +80,12 @@
     text-align:left;
 }
 .detalle-table th {
-    background:#fcd5e4;
-    color:#a14a7f;
+    background: var(--fondo-navbar);
+    color: var(--lila-logo);
 }
 .btn-completar, .filtro-form button {
-    background: #ff92b2;
-    color: #a14a7f;
+    background: var(--rosa-logo);
+    color: var(--lila-logo);
     border: none;
     border-radius: 8px;
     padding: 8px 18px;
@@ -84,8 +96,8 @@
     box-shadow: 0 2px 6px rgba(161,74,127,0.08);
 }
 .btn-completar:hover, .filtro-form button:hover {
-    background: #a14a7f;
-    color: #fff;
+    background: var(--celeste-logo);
+    color: var(--rosa-logo);
 }
 .success {
     background:#e0ffe0;

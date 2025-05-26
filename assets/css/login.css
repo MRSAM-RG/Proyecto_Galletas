@@ -1,9 +1,20 @@
+/* Paleta Dulce Tentación */
+:root {
+  --rosa-logo: #ff92b2;
+  --amarillo-logo: #ffe066;
+  --celeste-logo: #4edfff;
+  --lila-logo: #b48fff;
+  --naranja-logo: #ffb366;
+  --fondo-claro: #fff8f6;
+  --fondo-navbar: #fcd5e4;
+  --acento-oscuro: #a14a7f;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
-                url('../assets/img/fondo.jpg') center/cover no-repeat;
+    background: linear-gradient(135deg, var(--rosa-logo) 0%, var(--lila-logo) 100%);
     backdrop-filter: blur(5px);
     display: flex;
     justify-content: center;
@@ -55,7 +66,7 @@ body::after {
 
 h2 {
     margin-bottom: 20px;
-    color: black;
+    color: var(--rosa-logo);
 }
 
 input[type="email"],
@@ -74,8 +85,8 @@ textarea {
 button {
     width: 100%;
     padding: 12px;
-    background-color: rgba(255, 105, 180, 0.8);
-    color: white;
+    background-color: var(--rosa-logo);
+    color: #fff;
     border: none;
     border-radius: 10px;
     font-size: 16px;
@@ -84,12 +95,12 @@ button {
 }
 
 button:hover {
-    background-color: white;
-    color: rgba(255, 105, 180, 0.8);
+    background-color: var(--celeste-logo);
+    color: var(--rosa-logo);
 }
 
 .error {
-    background-color: #ffe0e0;
+    background-color: var(--amarillo-logo)33;
     color: #d10000;
     padding: 10px;
     margin-bottom: 15px;
@@ -97,12 +108,12 @@ button:hover {
 }
 
 a {
-    color: rgba(255, 105, 180, 0.8);
+    color: var(--lila-logo);
     text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: var(--amarillo-logo);
 }
 
 .success {

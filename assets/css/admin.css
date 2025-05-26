@@ -5,17 +5,28 @@
     box-sizing: border-box;
 }
 
+/* Paleta Dulce Tentación */
+:root {
+  --rosa-logo: #ff92b2;
+  --amarillo-logo: #ffe066;
+  --celeste-logo: #4edfff;
+  --lila-logo: #b48fff;
+  --naranja-logo: #ffb366;
+  --fondo-claro: #fff8f6;
+  --fondo-navbar: #fcd5e4;
+  --acento-oscuro: #a14a7f;
+}
+
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #fff8f6;
+    background-color: var(--fondo-claro);
     color: #333;
     line-height: 1.6;
 }
 /* Header principal */
 .hero {
-    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
-                url('../assets/img/fondo.jpg') center/cover no-repeat;
-    color: white;
+    background: linear-gradient(135deg, var(--rosa-logo) 0%, var(--lila-logo) 100%);
+    color: #fff;
     height: 320px; /* Altura reducida */
     position: relative;
     overflow: hidden;
@@ -65,13 +76,13 @@ body {
     gap: 20px;
 }
 .nav-links li a {
-    color: #fff;
+    color: var(--lila-logo);
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s;
 }
 .nav-links li a:hover {
-    color: #ff92b2;
+    color: var(--rosa-logo);
 }
 /* Hero content */
 .hero-content {
@@ -90,8 +101,8 @@ body {
 .btn {
     display: inline-block;
     padding: 15px 30px;
-    background: #fff;
-    color: #ff3c78;
+    background: var(--rosa-logo);
+    color: #fff;
     font-weight: bold;
     border-radius: 50px;
     text-decoration: none;
@@ -99,8 +110,8 @@ body {
     cursor: pointer;
 }
 .btn:hover {
-    background: #ffd1e0;
-    transform: scale(1.05);
+    background: var(--celeste-logo);
+    color: var(--rosa-logo);
 }
 
 @media (max-width: 768px) {
@@ -122,20 +133,20 @@ body {
 }
 
 .nav-links li a {
-    color: #fff;
+    color: var(--lila-logo);
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s;
 }
 
 .nav-links li a:hover {
-    color: #ff92b2;
+    color: var(--rosa-logo);
 }
 
 /* TABLAS Y SECCIONES */
 section {
     margin-top: 3rem;
-    background-color: #ffffff;
+    background-color: #fff;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -154,33 +165,33 @@ th, td {
 }
 
 th {
-    background-color: #fce4ec;
-    color: #ad1457;
+    background-color: var(--rosa-logo)22;
+    color: var(--lila-logo);
 }
 
 a {
-    color: #d81b60;
+    color: var(--rosa-logo);
     text-decoration: none;
     font-weight: bold;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: var(--amarillo-logo);
 }
 
 /* BOTÓN DE AGREGAR */
 a[href*="crear_producto"] {
     display: inline-block;
     margin-bottom: 1rem;
-    background-color: #f06292;
-    color: white;
+    background-color: var(--naranja-logo);
+    color: #fff;
     padding: 0.6rem 1.2rem;
     border-radius: 8px;
     transition: background 0.3s;
 }
 
 a[href*="crear_producto"]:hover {
-    background-color: #ec407a;
+    background-color: var(--rosa-logo);
 }
 
 /* RESPONSIVE */

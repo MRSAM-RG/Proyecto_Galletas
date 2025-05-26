@@ -7,32 +7,44 @@
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #fff8f6;
+    background-color: var(--fondo-claro);
     color: #333;
     line-height: 1.6;
 }
 
+/* Paleta Dulce Tentación */
+:root {
+  --rosa-logo: #ff92b2;
+  --amarillo-logo: #ffe066;
+  --celeste-logo: #4edfff;
+  --lila-logo: #b48fff;
+  --naranja-logo: #ffb366;
+  --fondo-claro: #fff8f6;
+  --fondo-navbar: #fcd5e4;
+  --acento-oscuro: #a14a7f;
+}
+
 /* HERO HEADER (Administrador / Página principal) */
 .hero {
-    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
-                url('../assets/img/fondo.jpg') center/cover no-repeat;
     color: #fff;
-    height: 320px;
     position: relative;
     overflow: hidden;
+    min-height: 350px;
+    height: 40vh;
+    background: linear-gradient(135deg, var(--rosa-logo) 0%, var(--lila-logo) 100%);
 }
 
 .hero-content h1 {
     font-size: 3rem;
     font-weight: bold;
     margin-bottom: 1.5rem;
-    color: #fff;
-    text-shadow: 2px 2px 8px #a14a7f, 0 2px 8px #a14a7f;
+    color: white;
+    text-shadow: 2px 2px 8px var(--lila-logo), 0 2px 8px var(--naranja-logo);
 }
 .hero-content p {
-    color: #fff;
+    color: var(--lila-logo);
     font-size: 1.2rem;
-    text-shadow: 1px 1px 6px #a14a7f;
+    text-shadow: 1px 1px 6px var(--naranja-logo);
 }
 
 /* Animación decorativa */
@@ -61,7 +73,7 @@ body {
 
 /* --- NAVBAR UNIFICADA PARA TODO EL SISTEMA --- */
 .navbar {
-    background: #fcd5e4;
+    background: var(--fondo-navbar);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -80,7 +92,7 @@ body {
     object-fit: contain;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid #ff92b2;
+    border: 2px solid var(--rosa-logo);
 }
 .nav-links {
     list-style: none;
@@ -96,7 +108,7 @@ body {
     transition: color 0.2s;
 }
 .nav-links a:hover {
-    color: #a14a7f !important;
+    color: var(--amarillo-logo) !important;
 }
 /* --- FIN NAVBAR UNIFICADA --- */
 
@@ -130,8 +142,8 @@ textarea {
 button {
     width: 100%;
     padding: 12px;
-    background-color: rgba(255, 105, 180, 0.8);
-    color: white;
+    background-color: var(--rosa-logo);
+    color: #fff;
     border: none;
     border-radius: 10px;
     font-size: 16px;
@@ -139,8 +151,8 @@ button {
     transition: background-color 0.3s ease;
 }
 button:hover {
-    background-color: white;
-    color: rgba(255, 105, 180, 0.8);
+    background-color: var(--celeste-logo);
+    color: var(--rosa-logo);
 }
 .error, .success {
     padding: 10px;
@@ -156,11 +168,11 @@ button:hover {
     color: #007e00;
 }
 a {
-    color: rgba(255, 105, 180, 0.8);
+    color: var(--lila-logo);
     text-decoration: none;
 }
 a:hover {
-    text-decoration: underline;
+    color: var(--amarillo-logo);
 }
 
 /* TABLAS ADMIN */
@@ -175,16 +187,16 @@ th, td {
     text-align: left;
 }
 h1, h2, h3, h4, h5, h6 {
-    color: #a14a7f;
+    color: var(--lila-logo);
 }
 .product-section h2 {
-    color: #a14a7f;
+    color: var(--naranja-logo) !important;
 }
 .product-card h3 {
-    color: #a14a7f;
+    color: var(--naranja-logo) !important;
 }
 .mvv-card h2 {
-    color: #a14a7f !important;
+    color: var(--naranja-logo) !important;
 }
 .mvv-card p {
     color: #333 !important;
@@ -254,27 +266,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 .product-card label {
     font-size: 1rem;
-    color: #a14a7f;
+    color: var(--lila-logo);
     font-weight: 500;
     margin-right: 0.3rem;
 }
 .product-card select,
 .product-card input[type="number"] {
     padding: 0.5rem 1rem;
-    border: 1.5px solid #ffd1e0;
+    border: 1.5px solid var(--rosa-logo);
     border-radius: 12px;
     font-size: 1rem;
     background: #fff;
-    color: #a14a7f;
+    color: var(--lila-logo);
     outline: none;
     transition: border 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(255,146,178,0.07);
+    box-shadow: 0 2px 8px var(--rosa-logo)11;
     margin-right: 0.5rem;
 }
 .product-card select:focus,
 .product-card input[type="number"]:focus {
-    border: 1.5px solid #c2185b;
-    box-shadow: 0 0 0 2px #ff92b255;
+    border: 1.5px solid var(--lila-logo);
+    box-shadow: 0 0 0 2px var(--rosa-logo)55;
 }
 .product-card input[type="number"]::-webkit-inner-spin-button,
 .product-card input[type="number"]::-webkit-outer-spin-button {
@@ -288,7 +300,7 @@ h1, h2, h3, h4, h5, h6 {
 .product-card button {
     width: 100%;
     margin-top: 1rem;
-    background: #ff92b2;
+    background: var(--rosa-logo);
     color: #fff;
     font-weight: bold;
     border-radius: 8px;
@@ -296,20 +308,19 @@ h1, h2, h3, h4, h5, h6 {
     transition: background 0.2s;
 }
 .product-card button:hover {
-    background: #a14a7f;
-    color: #fff;
+    background: var(--celeste-logo);
+    color: var(--rosa-logo);
 }
 .precio {
-    color: #d1005f;
+    color: var(--amarillo-logo);
     font-weight: bold;
 }
 
 /* FOOTER */
 .footer {
-    background-color: #fcd5e4;
+    background-color: var(--fondo-navbar);
     padding: 30px 20px;
     text-align: center;
-    border-top: 2px solid #ffd1e0;
     margin-top: 60px;
     font-size: 14px;
 }
@@ -318,7 +329,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: 8px 0;
 }
 .footer a {
-    color: #c2185b;
+    color: var(--rosa-logo);
     font-weight: 500;
     text-decoration: none;
 }
@@ -443,7 +454,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: auto;
 }
 .cta-btn {
-    background: #fff;
+    background: var(--rosa-logo);
     color: #c2185b;
     padding: 0.9rem 2.2rem;
     border-radius: 30px;
@@ -457,8 +468,8 @@ h1, h2, h3, h4, h5, h6 {
     display: inline-block;
 }
 .cta-btn:hover {
-    background: #c2185b;
-    color: #fff;
+    background: var(--celeste-logo);
+    color: var(--rosa-logo);
     transform: translateY(-2px) scale(1.04);
 }
 /* BLOBS DECORATIVOS */
@@ -646,7 +657,7 @@ h1, h2, h3, h4, h5, h6 {
 #contactForm label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #a14a7f;
+    color: var(--lila-logo);
     font-weight: 500;
     font-size: 1.05rem;
 }
@@ -654,20 +665,20 @@ h1, h2, h3, h4, h5, h6 {
 #contactForm textarea {
     width: 100%;
     padding: 0.9rem 1rem;
-    border: 1.5px solid #ffd1e0;
+    border: 1.5px solid var(--rosa-logo);
     border-radius: 10px;
     font-size: 1rem;
     background: #fff;
-    color: #a14a7f;
+    color: var(--lila-logo);
     outline: none;
     margin-bottom: 1.2rem;
     transition: border 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(255,146,178,0.07);
+    box-shadow: 0 2px 8px var(--rosa-logo)11;
 }
 #contactForm input:focus,
 #contactForm textarea:focus {
-    border: 1.5px solid #c2185b;
-    box-shadow: 0 0 0 2px #ff92b255;
+    border: 1.5px solid var(--lila-logo);
+    box-shadow: 0 0 0 2px var(--rosa-logo)55;
 }
 #contactForm textarea {
     min-height: 120px;
@@ -717,7 +728,7 @@ h1, h2, h3, h4, h5, h6 {
     display: block;
     height: 4px;
     width: 100%;
-    background: #ff92b2;
+    background: var(--rosa-logo);
     border-radius: 2px;
     transition: all 0.3s;
 }

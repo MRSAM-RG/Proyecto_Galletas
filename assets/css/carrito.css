@@ -1,18 +1,30 @@
+/* Paleta Dulce Tentación */
+:root {
+  --rosa-logo: #ff92b2;
+  --amarillo-logo: #ffe066;
+  --celeste-logo: #4edfff;
+  --lila-logo: #b48fff;
+  --naranja-logo: #ffb366;
+  --fondo-claro: #fff8f6;
+  --fondo-navbar: #fcd5e4;
+  --acento-oscuro: #a14a7f;
+}
+
 .cart-section {
     padding: 40px 20px; /* Menos espacio arriba y a los lados */
-    background: #fff0f6;
+    background: var(--fondo-navbar);
     text-align: center;
     margin-top: -20px; /* Solapa levemente con el header */
 }
 
 .cart-section h1 {
-    color: #ff3c78;
+    color: var(--rosa-logo);
     margin-bottom: 30px;
 }
 
 .cantidad {
     font-weight: bold;
-    color: #ff3c78;
+    color: var(--rosa-logo);
 }
 
 .cart-total {
@@ -21,7 +33,7 @@
 }
 
 .cart-total span {
-    color: #ff3c78;
+    color: var(--rosa-logo);
     font-weight: bold;
 }
 
@@ -32,11 +44,11 @@
 }
 
 .eliminar {
-    background-color: #ffb3c6;
+    background-color: var(--naranja-logo);
     margin-top: 10px;
 }
 .eliminar:hover {
-    background-color: #ff8faa;
+    background-color: var(--rosa-logo);
 }
 
 * {
@@ -47,14 +59,13 @@
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #fff8f6;
+    background-color: var(--fondo-claro);
     color: #333;
     line-height: 1.6;
 }
 /* Header principal */
 .hero {
-    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
-                url('../assets/img/fondo.jpg') center/cover no-repeat;
+    background: linear-gradient(135deg, var(--rosa-logo) 0%, var(--lila-logo) 100%);
     color: white;
     height: 320px; /* Altura reducida */
     position: relative;
@@ -105,13 +116,13 @@ body {
     gap: 20px;
 }
 .nav-links li a {
-    color: #fff;
+    color: var(--lila-logo);
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s;
 }
 .nav-links li a:hover {
-    color: #ff92b2;
+    color: var(--rosa-logo);
 }
 /* Hero content */
 .hero-content {
@@ -130,8 +141,8 @@ body {
 .btn {
     display: inline-block;
     padding: 15px 30px;
-    background: #fff;
-    color: #ff3c78;
+    background: var(--rosa-logo);
+    color: #fff;
     font-weight: bold;
     border-radius: 50px;
     text-decoration: none;
@@ -139,7 +150,8 @@ body {
     cursor: pointer;
 }
 .btn:hover {
-    background: #ffd1e0;
+    background: var(--celeste-logo);
+    color: var(--rosa-logo);
     transform: scale(1.05);
 }
 

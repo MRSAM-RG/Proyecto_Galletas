@@ -32,7 +32,7 @@ $db->desconectar();
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="../../assets/img/logo.png" alt="Logo Empresa">
+            <img src="../assets/img/logo.png" alt="Logo Empresa">
             <a href="index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
         </div>
         <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
@@ -54,11 +54,9 @@ $db->desconectar();
         </ul>
     </nav>
 
-    <header class="hero innovador">
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
+    <header class="hero innovador" style="background: url('../assets/img/fondo.png') center center / cover no-repeat;">
         <div class="hero-content">
-            <h1>¡Bienvenido a la Galería de Galletas!</h1>
+            <h1>¡Bienvenido a la galeria de galletas!</h1>
             <p>Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
         </div>
     </header>
@@ -143,8 +141,7 @@ $db->desconectar();
     </section>
     <footer class="footer">
         <div class="social-icons">
-            <a href="#"><img src="../assets/img/instagram.png" alt="Instagram"></a>
-            <a href="#"><img src="../assets/img/facebook.png" alt="Facebook"></a>
+            <a href="https://www.instagram.com/samuel.7sxx/"><img src="../assets/img/instagram.png" alt="Instagram"></a>
             <a href="#"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
         <p>© 2025 Galería de Galletas. Todos los derechos reservados.</p>

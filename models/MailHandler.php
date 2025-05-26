@@ -31,7 +31,7 @@ class MailHandler {
 
     public function sendContactEmail($name, $email, $subject, $message) {
         try {
-            $this->mailer->addAddress('rojasgaleanosamuel@gmail.com');
+            $this->mailer->addAddress('marianagonzalezochoa8@gmail.com');
             $this->mailer->addReplyTo($email, $name);
             $this->mailer->isHTML(true);
             $this->mailer->Subject = "Nuevo mensaje de contacto: $subject";
