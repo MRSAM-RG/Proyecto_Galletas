@@ -23,6 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Validación de stock
+    $stock_normal = filter_input(INPUT_POST, 'stock_normal', FILTER_VALIDATE_INT);
+    $stock_jumbo = filter_input(INPUT_POST, 'stock_jumbo', FILTER_VALIDATE_INT);
+
+    if ($stock_normal === false || $stock_jumbo === false || $stock_normal < 0 || $stock_jumbo < 0) {
+        header('Location: ../views/admin/admin.php?error=El stock debe ser un número entero positivo');
+        exit();
+    }
+
     // Validación de longitud
     if (strlen($nombre) < 3 || strlen($nombre) > 100) {
         header('Location: ../views/admin/admin.php?error=El nombre debe tener entre 3 y 100 caracteres');
@@ -83,17 +92,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt->execute()) {
         // Obtener el ID del producto recién insertado
         $producto_id = $stmt->insert_id;
-        // Obtener los valores de stock desde el formulario
-        $stock_normal = isset($_POST['stock_normal']) ? intval($_POST['stock_normal']) : 0;
-        $stock_jumbo = isset($_POST['stock_jumbo']) ? intval($_POST['stock_jumbo']) : 0;
-        // Insertar stock para tamaño normal
-        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'normal', ?)");
-        $stmt_stock->bind_param('ii', $producto_id, $stock_normal);
+        
+        // Insertar los precios específicos
+        $precios = [
+            ['normal', 'unidad', $_POST['precio_normal_unidad']],
+            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
+            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
+            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
+        ];
+        
+        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
+        
+        foreach ($precios as $precio) {
+            $stmt_precios->bind_param('issd', $producto_id, $precio[0], $precio[1], $precio[2]);
+            $stmt_precios->execute();
+        }
+
+        // Insertar el stock
+        $stmt_stock = $db->conexion->prepare("INSERT INTO stock_productos (producto_id, tamano, stock) VALUES (?, ?, ?)");
+        
+        // Insertar stock normal
+        $stmt_stock->bind_param('isi', $producto_id, 'normal', $stock_normal);
         $stmt_stock->execute();
-        // Insertar stock para tamaño jumbo
-        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'jumbo', ?)");
-        $stmt_stock->bind_param('ii', $producto_id, $stock_jumbo);
+        
+        // Insertar stock jumbo
+        $stmt_stock->bind_param('isi', $producto_id, 'jumbo', $stock_jumbo);
         $stmt_stock->execute();
+        
         header('Location: ../views/admin/admin.php?success=Producto agregado correctamente');
     } else {
         // Si hay error, eliminar la imagen subida

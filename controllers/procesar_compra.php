@@ -125,7 +125,13 @@ try {
 
     // Insertar detalles del pedido
     foreach ($carrito as $item) {
-        debug_log("Procesando item del carrito - Producto ID: {$item['producto_id']}, Cantidad: {$item['cantidad']}");
+        // debug_log("Procesando item del carrito - Producto ID: {$item['producto_id']}, Cantidad: {$item['cantidad']}");
+        
+        // Verificar que el precio existe
+        if (!isset($item['precio']) || $item['precio'] <= 0) {
+            // debug_log("Error: Precio inválido para el producto ID: {$item['producto_id']}");
+            throw new Exception('Error en el precio del producto');
+        }
         
         if (!$queryManager->addOrderDetail(
             $pedido_id, 
@@ -137,6 +143,11 @@ try {
         )) {
             debug_log("Error: No se pudo agregar el detalle del pedido para el producto ID: {$item['producto_id']}");
             throw new Exception('Error al agregar los detalles del pedido');
+        }
+        
+        // Actualizar el stock
+        if (!$queryManager->actualizarStock($item['producto_id'], $item['tamano'], $item['cantidad'])) {
+            throw new Exception('Error al actualizar el stock');
         }
         
         debug_log("Detalle del pedido agregado exitosamente para el producto ID: {$item['producto_id']}");

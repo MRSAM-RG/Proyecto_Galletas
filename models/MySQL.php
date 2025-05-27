@@ -6,7 +6,7 @@ class MySQL {
     private $host = 'localhost';
     private $usuario = 'root';
     private $clave = '';
-    private $db = 'galletas_db';
+    private $db = 'jc_bd';
 
     public function conectar() {
         $this->conexion = new mysqli($this->host, $this->usuario, $this->clave, $this->db);
@@ -59,6 +59,20 @@ class MySQL {
 
     public function obtenerUltimoId() {
         return $this->conexion->insert_id;
+    }
+
+    public function crearTablas() {
+        // Tabla de precios por producto, tamaño y presentación
+        $sql_precios = "CREATE TABLE IF NOT EXISTS precios_productos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            producto_id INT NOT NULL,
+            tamano ENUM('normal', 'jumbo') NOT NULL,
+            presentacion ENUM('unidad', 'paquete3') NOT NULL,
+            precio DECIMAL(10,2) NOT NULL,
+            FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+            UNIQUE KEY unique_precio (producto_id, tamano, presentacion)
+        )";
+        $this->conexion->query($sql_precios);
     }
 }
 

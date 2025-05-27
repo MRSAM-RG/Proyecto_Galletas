@@ -139,6 +139,33 @@ class QueryManager {
         return intval($result['total'] ?? 0);
     }
 
+    public function verificarStock($producto_id, $tamano, $cantidad) {
+        $stmt = $this->db->conexion->prepare("SELECT stock FROM stock_productos WHERE producto_id = ? AND tamano = ?");
+        $stmt->bind_param("is", $producto_id, $tamano);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        
+        if (!$result) {
+            return false;
+        }
+        
+        return $result['stock'] >= $cantidad;
+    }
+
+    public function getStockActual($producto_id, $tamano) {
+        $stmt = $this->db->conexion->prepare("SELECT stock FROM stock_productos WHERE producto_id = ? AND tamano = ?");
+        $stmt->bind_param("is", $producto_id, $tamano);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['stock'] : 0;
+    }
+
+    public function actualizarStock($producto_id, $tamano, $cantidad) {
+        $stmt = $this->db->conexion->prepare("UPDATE stock_productos SET stock = stock - ? WHERE producto_id = ? AND tamano = ?");
+        $stmt->bind_param("iis", $cantidad, $producto_id, $tamano);
+        return $stmt->execute();
+    }
+
     // ====== PEDIDOS ======
     public function createOrder($usuario_id, $direccion, $telefono) {
         $stmt = $this->db->conexion->prepare("INSERT INTO pedidos (usuario_id, fecha, estado, direccion, telefono) VALUES (?, NOW(), 'pendiente', ?, ?)");

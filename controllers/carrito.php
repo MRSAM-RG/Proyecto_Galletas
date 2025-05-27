@@ -38,23 +38,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Obtener stock disponible para el producto y tamaño
-    $stmt_stock = $db->conexion->prepare("SELECT stock FROM stock_productos WHERE producto_id = ? AND tamano = ?");
-    $stmt_stock->bind_param('is', $producto_id, $tamano);
-    $stmt_stock->execute();
-    $result_stock = $stmt_stock->get_result();
-    $stock_row = $result_stock->fetch_assoc();
-    $stock_disponible = $stock_row ? intval($stock_row['stock']) : 0;
-    // Debug temporal: si no hay registro de stock para ese tamaño
-    if ($stock_row === null) {
+    // Verificar stock disponible
+    if (!$queryManager->verificarStock($producto_id, $tamano, $cantidad)) {
         if ($isAjax) {
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No hay stock registrado para este tamaño.']);
+            echo json_encode(['success' => false, 'error' => 'No hay suficiente stock disponible para este producto']);
             exit();
         } else {
-            header('Location: ../views/index.php?error=No hay stock registrado para este tamaño.');
+            header('Location: ../views/index.php?stock_error=1');
             exit();
         }
+    }
+
+    // Obtener el precio específico según tamaño y presentación
+    $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
+    $stmt_precio->bind_param('iss', $producto_id, $tamano, $presentacion);
+    $stmt_precio->execute();
+    $result_precio = $stmt_precio->get_result();
+    $precio_row = $result_precio->fetch_assoc();
+    
+    if (!$precio_row) {
+        header('Location: ../views/index.php?error=Precio no disponible para esta combinación');
+        exit();
     }
 
     $usuario_id = $_SESSION['usuario_id'];

@@ -21,8 +21,17 @@ if (!$id) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING);
     $descripcion = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_STRING);
-    $precio = floatval($_POST['precio']);
+    $precio = isset($_POST['precio']) ? floatval($_POST['precio']) : 0;
     $factor_diferencial = filter_input(INPUT_POST, 'factor_diferencial', FILTER_SANITIZE_STRING);
+
+    // Validación de stock
+    $stock_normal = filter_input(INPUT_POST, 'stock_normal', FILTER_VALIDATE_INT);
+    $stock_jumbo = filter_input(INPUT_POST, 'stock_jumbo', FILTER_VALIDATE_INT);
+
+    if ($stock_normal === false || $stock_jumbo === false || $stock_normal < 0 || $stock_jumbo < 0) {
+        header('Location: ../views/admin/admin.php?error=El stock debe ser un número entero positivo');
+        exit();
+    }
 
     $imagen = null;
     if (!empty($_FILES['imagen']['name'])) {
@@ -36,20 +45,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $imagen = null;
     }
 
-    if ($queryManager->updateProduct($id, $nombre, $descripcion, $precio, $factor_diferencial, $imagen)) {
-        // Actualizar stock si se enviaron los campos
-        if (isset($_POST['stock_normal']) && isset($_POST['stock_jumbo'])) {
-            $stock_normal = intval($_POST['stock_normal']);
-            $stock_jumbo = intval($_POST['stock_jumbo']);
-            // Actualizar stock normal
-            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'normal'");
-            $stmt_stock->bind_param('ii', $stock_normal, $id);
-            $stmt_stock->execute();
-            // Actualizar stock jumbo
-            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'jumbo'");
-            $stmt_stock->bind_param('ii', $stock_jumbo, $id);
-            $stmt_stock->execute();
+    if ($queryManager->updateProduct($id, $nombre, $descripcion, $precio, $factor_diferencial, $imagen)) 
+        // Actualizar precios por tamaño y presentación
+        $precios = [
+            ['normal', 'unidad', $_POST['precio_normal_unidad']],
+            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
+            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
+            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
+        ];
+        // Eliminar precios anteriores
+        $stmt_del = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
+        $stmt_del->bind_param('i', $id);
+        $stmt_del->execute();
+        // Insertar nuevos precios
+        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
+        foreach ($precios as $precio_arr) {
+            $tamano = $precio_arr[0];
+            $presentacion = $precio_arr[1];
+            $valor = $precio_arr[2];
+            $stmt_precios->bind_param('issd', $id, $tamano, $presentacion, $valor);
+            $stmt_precios->execute();
         }
+
+        // Actualizar el stock
+        $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = ?");
+        
+        // Actualizar stock normal
+        $tamano_normal = 'normal';
+        $stmt_stock->bind_param('iis', $stock_normal, $id, $tamano_normal);
+        $stmt_stock->execute();
+        
+        // Actualizar stock jumbo
+        $tamano_jumbo = 'jumbo';
+        $stmt_stock->bind_param('iis', $stock_jumbo, $id, $tamano_jumbo);
+        $stmt_stock->execute();
+
         header('Location: ../views/admin/admin.php?success=Producto actualizado correctamente');
     } else {
         if ($imagen) {
@@ -58,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ../views/admin/admin.php?error=Error al actualizar el producto');
     }
     exit();
-}
 
 $producto = $queryManager->getProductById($id);
 if (!$producto) {

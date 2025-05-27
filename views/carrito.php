@@ -238,6 +238,30 @@ $db->desconectar();
 
     // Agregar event listeners a todos los botones de eliminar
     document.addEventListener('DOMContentLoaded', function() {
+        // Validar stock al cambiar cantidad
+        document.querySelectorAll('input[name="cantidad"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const form = this.closest('form');
+                const productoId = form.querySelector('input[name="producto_id"]').value;
+                const tamano = form.querySelector('input[name="tamano"]').value;
+                const cantidad = this.value;
+
+                fetch(`../controllers/verificar_stock.php?producto_id=${productoId}&tamano=${tamano}&cantidad=${cantidad}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            Swal.fire({
+                                title: 'Stock insuficiente',
+                                text: data.error,
+                                icon: 'error',
+                                confirmButtonColor: '#a14a7f'
+                            });
+                            this.value = this.defaultValue;
+                        }
+                    });
+            });
+        });
+
         document.querySelectorAll('.btn-eliminar').forEach(button => {
             button.addEventListener('click', function() {
                 const form = this.closest('form');
@@ -283,6 +307,16 @@ $db->desconectar();
             });
             return false;
         }
+
+        // Mostrar loading mientras se procesa
+        Swal.fire({
+            title: 'Procesando pedido',
+            text: 'Por favor espere...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         // Si la validación es exitosa, mostrar confirmación y enviar el formulario
         Swal.fire({

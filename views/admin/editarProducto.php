@@ -78,6 +78,18 @@ if (!$producto) {
             <label>Stock Jumbo:</label><br>
             <input type="number" name="stock_jumbo" min="0" value="<?= $stock_jumbo ?>" required><br><br>
 
+            <h3 style="color:#a14a7f;">Stock por Tamaño</h3>
+            <div class="precios-grid">
+                <div class="precio-item">
+                    <label>Stock Normal:</label>
+                    <input type="number" name="stock_normal" min="0" required value="<?= $stock_normal ?>">
+                </div>
+                <div class="precio-item">
+                    <label>Stock Jumbo:</label>
+                    <input type="number" name="stock_jumbo" min="0" required value="<?= $stock_jumbo ?>">
+                </div>
+            </div>
+
             <label>Imagen (dejar vacío para mantener actual):</label><br>
             <input type="file" name="imagen" accept="image/*"><br><br>
 
