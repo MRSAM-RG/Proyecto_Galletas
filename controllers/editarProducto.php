@@ -37,18 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($queryManager->updateProduct($id, $nombre, $descripcion, $precio, $factor_diferencial, $imagen)) {
-        // Actualizar stock si se enviaron los campos
-        if (isset($_POST['stock_normal']) && isset($_POST['stock_jumbo'])) {
-            $stock_normal = intval($_POST['stock_normal']);
-            $stock_jumbo = intval($_POST['stock_jumbo']);
-            // Actualizar stock normal
-            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'normal'");
-            $stmt_stock->bind_param('ii', $stock_normal, $id);
-            $stmt_stock->execute();
-            // Actualizar stock jumbo
-            $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = 'jumbo'");
-            $stmt_stock->bind_param('ii', $stock_jumbo, $id);
-            $stmt_stock->execute();
+        // Actualizar precios por tamaño y presentación
+        $precios = [
+            ['normal', 'unidad', $_POST['precio_normal_unidad']],
+            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
+            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
+            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
+        ];
+        // Eliminar precios anteriores
+        $stmt_del = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
+        $stmt_del->bind_param('i', $id);
+        $stmt_del->execute();
+        // Insertar nuevos precios
+        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
+        foreach ($precios as $precio) {
+            $stmt_precios->bind_param('issd', $id, $precio[0], $precio[1], $precio[2]);
+            $stmt_precios->execute();
         }
         header('Location: ../views/admin/admin.php?success=Producto actualizado correctamente');
     } else {

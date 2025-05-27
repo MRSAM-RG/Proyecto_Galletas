@@ -18,6 +18,15 @@ if (!$result) {
     die("Error al obtener los productos");
 }
 
+// Obtener precios para todos los productos
+$precios = [];
+$stmt = $db->conexion->prepare("SELECT producto_id, tamano, precio FROM precios_productos WHERE presentacion = 'unidad'");
+$stmt->execute();
+$result_precios = $stmt->get_result();
+while ($row = $result_precios->fetch_assoc()) {
+    $precios[$row['producto_id']][$row['tamano']] = $row['precio'];
+}
+
 $db->desconectar();
 ?>
 
@@ -92,17 +101,20 @@ $db->desconectar();
                             <img src="../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" style="width:400px;height:400px;object-fit:cover;display:block">
                             <h3><?php echo htmlspecialchars_decode($producto['nombre']); ?></h3>
                             <p><?php echo htmlspecialchars_decode($producto['descripcion']); ?></p>
-                            <p class="precio"><?= '$' . number_format($producto['precio'], 0, ',', '.') ?></p>
+                            <div class="precios-container">
+                                <p class="precio">Normal: $<?= isset($precios[$producto['id']]['normal']) ? number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A' ?></p>
+                                <p class="precio">Jumbo: $<?= isset($precios[$producto['id']]['jumbo']) ? number_format($precios[$producto['id']]['jumbo'], 0, ',', '.') : 'N/A' ?></p>
+                            </div>
                             <?php if (isset($_SESSION['usuario_id'])): ?>
                                 <form class="add-cart-form" action="../controllers/carrito.php" method="POST" style="margin-top: 1rem;">
                                     <input type="hidden" name="producto_id" value="<?php echo $producto['id']; ?>">
                                     <label style="font-size:0.95rem;">Tamaño:</label>
-                                    <select name="tamano" style="margin:0 0.5rem 0 0.5rem;">
+                                    <select name="tamano" style="margin:0 0.5rem 0 0.5rem;" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
                                         <option value="normal">Normal</option>
                                         <option value="jumbo">Jumbo</option>
                                     </select>
                                     <label style="font-size:0.95rem;">Presentación:</label>
-                                    <select name="presentacion" style="margin:0 0.5rem 0 0.5rem;">
+                                    <select name="presentacion" style="margin:0 0.5rem 0 0.5rem;" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
                                         <option value="unidad">Unidad</option>
                                         <option value="paquete3">Paquete de 3</option>
                                     </select>
@@ -221,6 +233,24 @@ if (document.querySelectorAll('.add-cart-form').length) {
         });
     });
 }
+function actualizarPrecio(productoId) {
+    const tamano = document.querySelector(`select[name=\"tamano\"][onchange=\"actualizarPrecio(${productoId})\"]`).value;
+    const presentacion = document.querySelector(`select[name=\"presentacion\"][onchange=\"actualizarPrecio(${productoId})\"]`).value;
+    fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=${tamano}&presentacion=${presentacion}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`precio-${productoId}`).textContent = '$' + new Intl.NumberFormat('es-CO').format(data.precio);
+            }
+        });
+}
+// Llamar a actualizarPrecio al cargar la página para cada producto
+window.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-card').forEach(card => {
+        const id = card.querySelector('input[name="producto_id"]').value;
+        actualizarPrecio(id);
+    });
+});
 </script>
 <?php if (isset($_GET['stock_error'])): ?>
 <script>

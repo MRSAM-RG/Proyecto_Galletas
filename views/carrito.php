@@ -201,12 +201,13 @@ $db->desconectar();
                     <div id="direccionModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;align-items:center;justify-content:center;">
                         <div style="background:#fff;padding:2rem 2.5rem;border-radius:16px;max-width:400px;margin:auto;position:relative;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
                             <h2>Dirección de Envío</h2>
-                            <form action="../controllers/procesar_compra.php" method="POST" onsubmit="return validarDireccion(event)">
+                            <form id="pedidoForm" action="../controllers/procesar_compra.php" method="POST">
                                 <label for="direccion">Dirección completa:</label>
                                 <input type="text" id="direccion" name="direccion" required style="width:100%;margin:12px 0 18px 0;padding:10px;border-radius:8px;border:1px solid #ccc;">
                                 <label for="telefono">Número de teléfono:</label>
                                 <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" style="width:100%;margin:12px 0 18px 0;padding:10px;border-radius:8px;border:1px solid #ccc;" placeholder="Ej: 1234567890">
                                 <div style="display:flex;gap:1rem;justify-content:flex-end;">
+                                    <button type="button" onclick="document.getElementById('direccionModal').style.display='none'">Cancelar</button>
                                     <button type="submit">Confirmar Pedido</button>
                                 </div>
                             </form>
@@ -220,10 +221,26 @@ $db->desconectar();
     document.getElementById('hamburger-btn').addEventListener('click', function() {
         document.querySelector('.nav-links').classList.toggle('open');
     });
-    </script>
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
-    <script>
+
+    // Mostrar mensajes de error o éxito
+    <?php if (isset($_GET['error'])): ?>
+        Swal.fire({
+            title: 'Error',
+            text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+    <?php endif; ?>
+
+    <?php if (isset($_GET['success'])): ?>
+        Swal.fire({
+            title: '¡Éxito!',
+            text: '<?php echo htmlspecialchars($_GET['success']); ?>',
+            icon: 'success',
+            confirmButtonColor: '#a14a7f'
+        });
+    <?php endif; ?>
+
     // Actualiza el contador del carrito
     function updateCartCount() {
         var cartCount = document.getElementById('cart-count');
@@ -260,8 +277,8 @@ $db->desconectar();
         });
     });
 
-    function validarDireccion(event) {
-        event.preventDefault();
+    document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         var dir = document.getElementById('direccion').value.trim();
         var tel = document.getElementById('telefono').value.trim();
         
@@ -272,7 +289,7 @@ $db->desconectar();
                 icon: 'error',
                 confirmButtonColor: '#a14a7f'
             });
-            return false;
+            return;
         }
         if (!/^[0-9]{10}$/.test(tel)) {
             Swal.fire({
@@ -281,22 +298,12 @@ $db->desconectar();
                 icon: 'error',
                 confirmButtonColor: '#a14a7f'
             });
-            return false;
+            return;
         }
 
-        // Si la validación es exitosa, mostrar confirmación y enviar el formulario
-        Swal.fire({
-            title: '¡Pedido Confirmado!',
-            text: 'Tu pedido ha sido procesado correctamente.',
-            icon: 'success',
-            confirmButtonColor: '#a14a7f'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.querySelector('form').submit();
-            }
-        });
-        return false;
-    }
+        // Si la validación es exitosa, enviar el formulario
+        this.submit();
+    });
 
     // Cerrar modal con Escape
     window.addEventListener('keydown', function(e) {

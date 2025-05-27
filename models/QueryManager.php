@@ -61,11 +61,6 @@ class QueryManager {
     }
 
     public function deleteProduct($id) {
-        // Eliminar de stock_productos
-        $stmt0 = $this->db->conexion->prepare("DELETE FROM stock_productos WHERE producto_id = ?");
-        $stmt0->bind_param("i", $id);
-        $stmt0->execute();
-
         // Eliminar primero del carrito
         $stmt1 = $this->db->conexion->prepare("DELETE FROM carrito WHERE producto_id = ?");
         $stmt1->bind_param("i", $id);
@@ -86,17 +81,19 @@ class QueryManager {
     public function getCartItems($usuario_id, $producto_id = null) {
         if ($producto_id === null) {
             $stmt = $this->db->conexion->prepare("
-                SELECT carrito.*, productos.nombre, productos.precio, productos.imagen 
+                SELECT carrito.*, productos.nombre, productos.imagen, pp.precio
                 FROM carrito
                 JOIN productos ON carrito.producto_id = productos.id 
+                JOIN precios_productos pp ON pp.producto_id = carrito.producto_id AND pp.tamano = carrito.tamano AND pp.presentacion = carrito.presentacion
                 WHERE carrito.usuario_id = ?;
             ");
             $stmt->bind_param("i", $usuario_id);
         } else {
             $stmt = $this->db->conexion->prepare("
-                SELECT carrito.*, productos.nombre, productos.precio, productos.imagen 
+                SELECT carrito.*, productos.nombre, productos.imagen, pp.precio
                 FROM carrito
                 JOIN productos ON carrito.producto_id = productos.id 
+                JOIN precios_productos pp ON pp.producto_id = carrito.producto_id AND pp.tamano = carrito.tamano AND pp.presentacion = carrito.presentacion
                 WHERE carrito.usuario_id = ? AND carrito.producto_id = ?;
             ");
             $stmt->bind_param("ii", $usuario_id, $producto_id);
@@ -146,34 +143,48 @@ class QueryManager {
 
     // ====== PEDIDOS ======
     public function createOrder($usuario_id, $direccion, $telefono) {
-        $stmt = $this->db->conexion->prepare("INSERT INTO pedidos (usuario_id, fecha, estado, direccion, telefono) VALUES (?, NOW(), 'pendiente', ?, ?)");
+        $stmt = $this->db->conexion->prepare("
+            INSERT INTO pedidos (usuario_id, direccion, telefono, estado, fecha)
+            VALUES (?, ?, ?, 'pendiente', NOW())
+        ");
+        
         if (!$stmt) {
-            error_log('Error al preparar la consulta de creación de pedido: ' . $this->db->conexion->error);
+            // debug_log("Error al preparar la consulta de creación de pedido: " . $this->db->conexion->error);
             return false;
         }
         
-        $stmt->bind_param("iss", $usuario_id, $direccion, $telefono);
+        $stmt->bind_param('iss', $usuario_id, $direccion, $telefono);
+        
         if (!$stmt->execute()) {
-            error_log('Error al ejecutar la creación del pedido: ' . $stmt->error);
+            // debug_log("Error al crear el pedido: " . $stmt->error);
             return false;
         }
         
-        return $this->db->conexion->insert_id;
+        $pedido_id = $this->db->conexion->insert_id;
+        // debug_log("Pedido creado con ID: " . $pedido_id);
+        return $pedido_id;
     }
 
     public function addOrderDetail($pedido_id, $producto_id, $cantidad, $precio, $tamano, $presentacion) {
-        $stmt = $this->db->conexion->prepare("INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio, tamano, presentacion) VALUES (?, ?, ?, ?, ?, ?)");
+        // Insertar el detalle del pedido
+        $stmt = $this->db->conexion->prepare("
+            INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario, tamano, presentacion)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        
         if (!$stmt) {
-            error_log('Error al preparar la consulta de detalle de pedido: ' . $this->db->conexion->error);
+            // debug_log("Error al preparar la inserción del detalle: " . $this->db->conexion->error);
             return false;
         }
         
-        $stmt->bind_param("iiidss", $pedido_id, $producto_id, $cantidad, $precio, $tamano, $presentacion);
+        $stmt->bind_param('iiidss', $pedido_id, $producto_id, $cantidad, $precio, $tamano, $presentacion);
+        
         if (!$stmt->execute()) {
-            error_log('Error al ejecutar la inserción del detalle del pedido: ' . $stmt->error);
+            // debug_log("Error al insertar el detalle del pedido: " . $stmt->error);
             return false;
         }
         
+        // debug_log("Detalle del pedido agregado exitosamente para el pedido ID: $pedido_id");
         return true;
     }
 
@@ -254,7 +265,7 @@ class QueryManager {
 
     public function getAllOrderDetails() {
         $stmt = $this->db->conexion->prepare("
-            SELECT d.pedido_id, pr.nombre AS producto, d.cantidad, d.precio, d.tamano, d.presentacion 
+            SELECT d.pedido_id, pr.nombre AS producto, d.cantidad, d.precio_unitario AS precio, d.tamano, d.presentacion 
             FROM detalle_pedido d 
             JOIN productos pr ON d.producto_id = pr.id
         ");
@@ -269,5 +280,18 @@ class QueryManager {
         }
         
         return $stmt->get_result();
+    }
+
+    // Obtener precios por tamaño y presentación
+    public function getProductPrices($producto_id) {
+        $stmt = $this->db->conexion->prepare("SELECT tamano, presentacion, precio FROM precios_productos WHERE producto_id = ?");
+        $stmt->bind_param("i", $producto_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $precios = [];
+        while ($row = $result->fetch_assoc()) {
+            $precios[$row['tamano']][$row['presentacion']] = $row['precio'];
+        }
+        return $precios;
     }
 } 

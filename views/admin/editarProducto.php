@@ -28,6 +28,8 @@ while ($row = $result->fetch_assoc()) {
     if ($row['tamano'] === 'normal') $stock_normal = $row['stock'];
     if ($row['tamano'] === 'jumbo') $stock_jumbo = $row['stock'];
 }
+// Obtener precios actuales por tamaño y presentación
+$precios = $queryManager->getProductPrices($_GET['id']);
 $db->desconectar();
 if (!$producto) {
     header('Location: admin.php?error=Producto no encontrado');
@@ -59,8 +61,8 @@ if (!$producto) {
             <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
         </ul>
     </nav>
-    <h2>Editar Producto</h2>
     <div class="login-container">
+        <h1 style="color:#a14a7f;font-size:2.3rem;margin-bottom:1.2rem;">Editar Producto</h1>
         <form action="../../controllers/editarProducto.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?= htmlspecialchars($_GET['id']) ?>">
             <label>Nombre:</label><br>
@@ -69,14 +71,25 @@ if (!$producto) {
             <label>Descripción:</label><br>
             <textarea name="descripcion" required><?= htmlspecialchars($producto['descripcion']) ?></textarea><br><br>
 
-            <label>Precio:</label><br>
-            <input type="number" step="0.01" name="precio" value="<?= $producto['precio'] ?>" required><br><br>
-
-            <label>Stock Normal:</label><br>
-            <input type="number" name="stock_normal" min="0" value="<?= $stock_normal ?>" required><br><br>
-
-            <label>Stock Jumbo:</label><br>
-            <input type="number" name="stock_jumbo" min="0" value="<?= $stock_jumbo ?>" required><br><br>
+            <h3 style="color:#a14a7f;">Precios por Tamaño y Presentación</h3>
+            <div class="precios-grid">
+                <div class="precio-item">
+                    <label>Normal - Unidad:</label>
+                    <input type="number" name="precio_normal_unidad" step="0.01" min="0" required value="<?= isset($precios['normal']['unidad']) ? $precios['normal']['unidad'] : '' ?>">
+                </div>
+                <div class="precio-item">
+                    <label>Normal - Paquete de 3:</label>
+                    <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required value="<?= isset($precios['normal']['paquete3']) ? $precios['normal']['paquete3'] : '' ?>">
+                </div>
+                <div class="precio-item">
+                    <label>Jumbo - Unidad:</label>
+                    <input type="number" name="precio_jumbo_unidad" step="0.01" min="0" required value="<?= isset($precios['jumbo']['unidad']) ? $precios['jumbo']['unidad'] : '' ?>">
+                </div>
+                <div class="precio-item">
+                    <label>Jumbo - Paquete de 3:</label>
+                    <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required value="<?= isset($precios['jumbo']['paquete3']) ? $precios['jumbo']['paquete3'] : '' ?>">
+                </div>
+            </div>
 
             <label>Imagen (dejar vacío para mantener actual):</label><br>
             <input type="file" name="imagen" accept="image/*"><br><br>

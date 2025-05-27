@@ -83,6 +83,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt->execute()) {
         // Obtener el ID del producto recién insertado
         $producto_id = $stmt->insert_id;
+        
+        // Insertar los precios específicos
+        $precios = [
+            ['normal', 'unidad', $_POST['precio_normal_unidad']],
+            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
+            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
+            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
+        ];
+        
+        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
+        
+        foreach ($precios as $precio) {
+            $stmt_precios->bind_param('issd', $producto_id, $precio[0], $precio[1], $precio[2]);
+            $stmt_precios->execute();
+        }
+        
         // Obtener los valores de stock desde el formulario
         $stock_normal = isset($_POST['stock_normal']) ? intval($_POST['stock_normal']) : 0;
         $stock_jumbo = isset($_POST['stock_jumbo']) ? intval($_POST['stock_jumbo']) : 0;

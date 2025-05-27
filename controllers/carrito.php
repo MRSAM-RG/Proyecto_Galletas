@@ -38,43 +38,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Obtener stock disponible para el producto y tamaño
-    $stmt_stock = $db->conexion->prepare("SELECT stock FROM stock_productos WHERE producto_id = ? AND tamano = ?");
-    $stmt_stock->bind_param('is', $producto_id, $tamano);
-    $stmt_stock->execute();
-    $result_stock = $stmt_stock->get_result();
-    $stock_row = $result_stock->fetch_assoc();
-    $stock_disponible = $stock_row ? intval($stock_row['stock']) : 0;
-    // Debug temporal: si no hay registro de stock para ese tamaño
-    if ($stock_row === null) {
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No hay stock registrado para este tamaño.']);
-            exit();
-        } else {
-            header('Location: ../views/index.php?error=No hay stock registrado para este tamaño.');
-            exit();
-        }
+    // Obtener el precio específico según tamaño y presentación
+    $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
+    $stmt_precio->bind_param('iss', $producto_id, $tamano, $presentacion);
+    $stmt_precio->execute();
+    $result_precio = $stmt_precio->get_result();
+    $precio_row = $result_precio->fetch_assoc();
+    
+    if (!$precio_row) {
+        header('Location: ../views/index.php?error=Precio no disponible para esta combinación');
+        exit();
     }
+    
+    $precio = $precio_row['precio'];
 
+    // Eliminar verificación de stock
     $usuario_id = $_SESSION['usuario_id'];
 
     // Verificar si ya existe en el carrito
     $carrito_item = $queryManager->getCartItem($usuario_id, $producto_id, $tamano, $presentacion);
     $cantidad_en_carrito = $carrito_item ? intval($carrito_item['cantidad']) : 0;
     $nueva_cantidad = $cantidad_en_carrito + $cantidad;
-
-    // Validar stock suficiente
-    if ($nueva_cantidad > $stock_disponible) {
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No hay suficiente stock disponible']);
-            exit();
-        } else {
-            header('Location: ../views/index.php?stock_error=1');
-            exit();
-        }
-    }
 
     if ($carrito_item) {
         if ($queryManager->updateCartItem($carrito_item['id'], $nueva_cantidad)) {

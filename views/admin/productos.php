@@ -13,6 +13,16 @@ $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
 $productos = $queryManager->getAllProducts(false);
+
+// Obtener precios para todos los productos
+$precios = [];
+$stmt = $db->conexion->prepare("SELECT producto_id, tamano, precio FROM precios_productos WHERE presentacion = 'unidad'");
+$stmt->execute();
+$result_precios = $stmt->get_result();
+while ($row = $result_precios->fetch_assoc()) {
+    $precios[$row['producto_id']][$row['tamano']] = $row['precio'];
+}
+
 // Obtener stock de todos los productos
 $stocks = [];
 $result_stock = $db->conexion->query("SELECT producto_id, tamano, stock FROM stock_productos");
@@ -59,21 +69,23 @@ $db->desconectar();
                         <th>Imagen</th>
                         <th>Nombre</th>
                         <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Stock Normal</th>
-                        <th>Stock Jumbo</th>
+                        <th>Precio Normal (Unidad)</th>
+                        <th>Precio Jumbo (Unidad)</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php while ($producto = $productos->fetch_assoc()): ?>
+                    <?php
+                    $precio_normal_unidad = isset($precios[$producto['id']]['normal']) ? '$' . number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A';
+                    $precio_jumbo_unidad = isset($precios[$producto['id']]['jumbo']) ? '$' . number_format($precios[$producto['id']]['jumbo'], 0, ',', '.') : 'N/A';
+                    ?>
                     <tr>
                         <td><img src="../../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="img" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></td>
                         <td><?php echo htmlspecialchars_decode($producto['nombre']); ?></td>
                         <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
-                        <td><?= '$' . number_format($producto['precio'], 0, ',', '.') ?></td>
-                        <td><?= isset($stocks[$producto['id']]['normal']) ? $stocks[$producto['id']]['normal'] : 0 ?></td>
-                        <td><?= isset($stocks[$producto['id']]['jumbo']) ? $stocks[$producto['id']]['jumbo'] : 0 ?></td>
+                        <td><?= $precio_normal_unidad ?></td>
+                        <td><?= $precio_jumbo_unidad ?></td>
                         <td>
                             <a href="editarProducto.php?id=<?php echo $producto['id']; ?>">Editar</a> |
                             <a href="../../controllers/eliminarProducto.php?id=<?php echo $producto['id']; ?>" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
