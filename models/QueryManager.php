@@ -77,21 +77,35 @@ class QueryManager {
         return $stmt3->execute();
     }
 
+    public function getProductPrices($producto_id) {
+        $stmt = $this->db->conexion->prepare("SELECT tamano, presentacion, precio FROM precios_productos WHERE producto_id = ?");
+        $stmt->bind_param("i", $producto_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $precios = [];
+        while ($row = $result->fetch_assoc()) {
+            $precios[$row['tamano']][$row['presentacion']] = $row['precio'];
+        }
+        return $precios;
+    }
+
     // ====== CARRITO ======
     public function getCartItems($usuario_id, $producto_id = null) {
         if ($producto_id === null) {
             $stmt = $this->db->conexion->prepare("
-                SELECT carrito.*, productos.nombre, productos.precio, productos.imagen 
+                SELECT carrito.*, productos.nombre, productos.imagen, precios.precio
                 FROM carrito
-                JOIN productos ON carrito.producto_id = productos.id 
+                JOIN productos ON carrito.producto_id = productos.id
+                JOIN precios_productos AS precios ON carrito.producto_id = precios.producto_id AND carrito.tamano = precios.tamano AND carrito.presentacion = precios.presentacion
                 WHERE carrito.usuario_id = ?;
             ");
             $stmt->bind_param("i", $usuario_id);
         } else {
             $stmt = $this->db->conexion->prepare("
-                SELECT carrito.*, productos.nombre, productos.precio, productos.imagen 
+                SELECT carrito.*, productos.nombre, productos.imagen, precios.precio
                 FROM carrito
-                JOIN productos ON carrito.producto_id = productos.id 
+                JOIN productos ON carrito.producto_id = productos.id
+                JOIN precios_productos AS precios ON carrito.producto_id = precios.producto_id AND carrito.tamano = precios.tamano AND carrito.presentacion = precios.presentacion
                 WHERE carrito.usuario_id = ? AND carrito.producto_id = ?;
             ");
             $stmt->bind_param("ii", $usuario_id, $producto_id);

@@ -51,16 +51,25 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
                 <textarea id="descripcion" name="descripcion" required placeholder="Describe el producto..." style="resize:vertical;"></textarea>
             </div>
             <div class="form-group">
-                <label for="precio">Precio</label>
-                <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="Ej: 25000 (25.000)">
-            </div>
-            <div class="form-group">
-                <label for="stock_normal">Stock Normal:</label>
-                <input type="number" name="stock_normal" id="stock_normal" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="stock_jumbo">Stock Jumbo:</label>
-                <input type="number" name="stock_jumbo" id="stock_jumbo" min="0" required>
+                <h3>Precios por Tamaño y Presentación</h3>
+                <div class="precios-grid">
+                    <div class="precio-item">
+                        <label>Normal - Unidad:</label>
+                        <input type="number" name="precio_normal_unidad" step="0.01" min="0" required>
+                    </div>
+                    <div class="precio-item">
+                        <label>Normal - Paquete de 3:</label>
+                        <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required>
+                    </div>
+                    <div class="precio-item">
+                        <label>Jumbo - Unidad:</label>
+                        <input type="number" name="precio_jumbo_unidad" step="0.01" min="0" required>
+                    </div>
+                    <div class="precio-item">
+                        <label>Jumbo - Paquete de 3:</label>
+                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <h3>Stock por Tamaño</h3>

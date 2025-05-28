@@ -38,17 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Verificar stock disponible
-    if (!$queryManager->verificarStock($producto_id, $tamano, $cantidad)) {
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'No hay suficiente stock disponible para este producto']);
-            exit();
-        } else {
-            header('Location: ../views/index.php?stock_error=1');
-            exit();
-        }
-    }
+    // Obtener el stock disponible real
+    $stock_disponible = $queryManager->getStockActual($producto_id, $tamano);
 
     // Obtener el precio específico según tamaño y presentación
     $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
@@ -62,15 +53,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $usuario_id = $_SESSION['usuario_id'];
+    // Calcular la cantidad real a verificar según la presentación
+    $factor = ($presentacion === 'paquete3') ? 3 : 1;
+    $cantidad_real = $cantidad * $factor;
 
-    // Verificar si ya existe en el carrito
-    $carrito_item = $queryManager->getCartItem($usuario_id, $producto_id, $tamano, $presentacion);
-    $cantidad_en_carrito = $carrito_item ? intval($carrito_item['cantidad']) : 0;
-    $nueva_cantidad = $cantidad_en_carrito + $cantidad;
+    // Obtener todos los ítems del carrito para ese producto y tamaño
+    $usuario_id = $_SESSION['usuario_id'];
+    $result_items = $db->conexion->prepare("SELECT cantidad, presentacion FROM carrito WHERE usuario_id = ? AND producto_id = ? AND tamano = ?");
+    $result_items->bind_param('iis', $usuario_id, $producto_id, $tamano);
+    $result_items->execute();
+    $items = $result_items->get_result();
+    $total_unidades_en_carrito = 0;
+    while ($row = $items->fetch_assoc()) {
+        $row_factor = ($row['presentacion'] === 'paquete3') ? 3 : 1;
+        $total_unidades_en_carrito += $row['cantidad'] * $row_factor;
+    }
+    $total_unidades_despues = $total_unidades_en_carrito + $cantidad_real;
 
     // Validar stock suficiente
-    if ($nueva_cantidad > $stock_disponible) {
+    if ($total_unidades_despues > $stock_disponible) {
         if ($isAjax) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'error' => 'No hay suficiente stock disponible']);
@@ -81,8 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Verificar si ya existe en el carrito
+    $carrito_item = $queryManager->getCartItem($usuario_id, $producto_id, $tamano, $presentacion);
+    $cantidad_en_carrito = $carrito_item ? intval($carrito_item['cantidad']) : 0;
+    $cantidad_real_total = ($cantidad_en_carrito + $cantidad) * $factor;
+
     if ($carrito_item) {
-        if ($queryManager->updateCartItem($carrito_item['id'], $nueva_cantidad)) {
+        if ($queryManager->updateCartItem($carrito_item['id'], $cantidad_real_total)) {
             if ($isAjax) {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => true]);

@@ -64,11 +64,9 @@ $db->desconectar();
         </ul>
     </nav>
 
-    <header class="hero innovador">
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
+    <header class="hero innovador" style="background: url('../assets/img/fondo.png') center center / cover no-repeat;">
         <div class="hero-content">
-            <h1>¡Bienvenido a la Galería de Galletas!</h1>
+            <h1>¡Bienvenido a la galeria de galletas!</h1>
             <p>Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
         </div>
     </header>

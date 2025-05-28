@@ -67,18 +67,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_precios->execute();
         }
 
-        // Actualizar el stock
-        $stmt_stock = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = ?");
-        
-        // Actualizar stock normal
-        $tamano_normal = 'normal';
-        $stmt_stock->bind_param('iis', $stock_normal, $id, $tamano_normal);
-        $stmt_stock->execute();
-        
-        // Actualizar stock jumbo
-        $tamano_jumbo = 'jumbo';
-        $stmt_stock->bind_param('iis', $stock_jumbo, $id, $tamano_jumbo);
-        $stmt_stock->execute();
+        // Actualizar el stock (upsert manual)
+        foreach ([['normal', $stock_normal], ['jumbo', $stock_jumbo]] as [$tamano, $stock]) {
+            $stmt_update = $db->conexion->prepare("UPDATE stock_productos SET stock = ? WHERE producto_id = ? AND tamano = ?");
+            $stmt_update->bind_param('iis', $stock, $id, $tamano);
+            $stmt_update->execute();
+            if ($stmt_update->affected_rows === 0) {
+                // No existía, insertar
+                $stmt_insert = $db->conexion->prepare("INSERT INTO stock_productos (producto_id, tamano, stock) VALUES (?, ?, ?)");
+                $stmt_insert->bind_param('isi', $id, $tamano, $stock);
+                $stmt_insert->execute();
+                $stmt_insert->close();
+            }
+            $stmt_update->close();
+        }
 
         header('Location: ../views/admin/admin.php?success=Producto actualizado correctamente');
     } else {

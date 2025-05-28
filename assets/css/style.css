@@ -14,8 +14,7 @@ body {
 
 /* HERO HEADER (Administrador / Página principal) */
 .hero {
-    background: linear-gradient(to bottom, rgba(40, 0, 60, 0.8), rgba(255, 105, 180, 0.8)),
-                url('../assets/img/fondo.jpg') center/cover no-repeat;
+    background: url('.. /img/fondo.png') center/cover no-repeat;
     color: #fff;
     height: 320px;
     position: relative;

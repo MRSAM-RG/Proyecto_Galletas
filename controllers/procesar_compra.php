@@ -145,13 +145,6 @@ try {
             throw new Exception('Error al agregar los detalles del pedido');
         }
         
-        // Actualizar el stock
-        if (!$queryManager->actualizarStock($item['producto_id'], $item['tamano'], $item['cantidad'])) {
-            throw new Exception('Error al actualizar el stock');
-        }
-        
-        debug_log("Detalle del pedido agregado exitosamente para el producto ID: {$item['producto_id']}");
-        
         // Calcular cantidad real a descontar según presentación
         $descontar = ($item['presentacion'] === 'paquete3') ? $item['cantidad'] * 3 : $item['cantidad'];
         debug_log("Cantidad a descontar del stock: $descontar");
@@ -210,7 +203,7 @@ try {
     
     $db->desconectar();
     debug_log("Proceso de compra completado exitosamente");
-    header('Location: ../views/carrito.php?success=¡Pedido realizado con éxito!&pedido_id=' . $pedido_id);
+    header('Location: ../views/carrito.php?success=1');
     exit();
 
 } catch (Exception $e) {

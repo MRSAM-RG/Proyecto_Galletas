@@ -318,17 +318,8 @@ $db->desconectar();
             }
         });
 
-        // Si la validación es exitosa, mostrar confirmación y enviar el formulario
-        Swal.fire({
-            title: '¡Pedido Confirmado!',
-            text: 'Tu pedido ha sido procesado correctamente.',
-            icon: 'success',
-            confirmButtonColor: '#a14a7f'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.querySelector('form').submit();
-            }
-        });
+        // Enviar el formulario realmente
+        event.target.submit();
         return false;
     }
 
@@ -337,5 +328,17 @@ $db->desconectar();
         if (e.key === 'Escape') document.getElementById('direccionModal').style.display = 'none';
     });
     </script>
+    <?php if (isset($_GET['success'])): ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Pedido Confirmado!',
+            text: 'Tu pedido ha sido procesado correctamente.',
+            confirmButtonColor: '#a14a7f'
+        });
+    });
+    </script>
+    <?php endif; ?>
 </body>
 </html>
