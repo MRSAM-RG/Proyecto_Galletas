@@ -234,10 +234,16 @@ $db->desconectar();
 
     <?php if (isset($_GET['success'])): ?>
         Swal.fire({
-            title: '¡Éxito!',
+            title: '¡Pedido Realizado!',
             text: '<?php echo htmlspecialchars($_GET['success']); ?>',
             icon: 'success',
-            confirmButtonColor: '#a14a7f'
+            confirmButtonColor: '#a14a7f',
+            showConfirmButton: true,
+            confirmButtonText: 'Aceptar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'index.php';
+            }
         });
     <?php endif; ?>
 
@@ -301,8 +307,21 @@ $db->desconectar();
             return;
         }
 
-        // Si la validación es exitosa, enviar el formulario
-        this.submit();
+        // Confirmación final antes de procesar el pedido
+        Swal.fire({
+            title: '¿Confirmar pedido?',
+            text: '¿Estás seguro de que deseas procesar este pedido?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#a14a7f',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, procesar pedido',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
     });
 
     // Cerrar modal con Escape

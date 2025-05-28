@@ -17,20 +17,11 @@ $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
 $producto = $queryManager->getProductById($_GET['id']);
-// Obtener stock actual para ambos tamaños
-$stock_normal = 0;
-$stock_jumbo = 0;
-$stmt = $db->conexion->prepare("SELECT tamano, stock FROM stock_productos WHERE producto_id = ?");
-$stmt->bind_param("i", $_GET['id']);
-$stmt->execute();
-$result = $stmt->get_result();
-while ($row = $result->fetch_assoc()) {
-    if ($row['tamano'] === 'normal') $stock_normal = $row['stock'];
-    if ($row['tamano'] === 'jumbo') $stock_jumbo = $row['stock'];
-}
-// Obtener precios actuales por tamaño y presentación
+
+// Obtener precios actuales
 $precios = $queryManager->getProductPrices($_GET['id']);
 $db->desconectar();
+
 if (!$producto) {
     header('Location: admin.php?error=Producto no encontrado');
     exit();
@@ -43,6 +34,7 @@ if (!$producto) {
     <title>Editar Producto</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/pedidos.css">
+    <script src="../../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -63,40 +55,131 @@ if (!$producto) {
     </nav>
     <div class="login-container">
         <h1 style="color:#a14a7f;font-size:2.3rem;margin-bottom:1.2rem;">Editar Producto</h1>
-        <form action="../../controllers/editarProducto.php" method="POST" enctype="multipart/form-data">
+        <form action="../../controllers/editarProducto.php" method="POST" enctype="multipart/form-data" id="editarForm">
             <input type="hidden" name="id" value="<?= htmlspecialchars($_GET['id']) ?>">
-            <label>Nombre:</label><br>
-            <input type="text" name="nombre" value="<?= htmlspecialchars($producto['nombre']) ?>" required><br><br>
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="<?= htmlspecialchars($producto['nombre']) ?>" required>
+            </div>
 
-            <label>Descripción:</label><br>
-            <textarea name="descripcion" required><?= htmlspecialchars($producto['descripcion']) ?></textarea><br><br>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" required><?= htmlspecialchars($producto['descripcion']) ?></textarea>
+            </div>
 
-            <h3 style="color:#a14a7f;">Precios por Tamaño y Presentación</h3>
-            <div class="precios-grid">
-                <div class="precio-item">
-                    <label>Normal - Unidad:</label>
-                    <input type="number" name="precio_normal_unidad" step="0.01" min="0" required value="<?= isset($precios['normal']['unidad']) ? $precios['normal']['unidad'] : '' ?>">
-                </div>
-                <div class="precio-item">
-                    <label>Normal - Paquete de 3:</label>
-                    <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required value="<?= isset($precios['normal']['paquete3']) ? $precios['normal']['paquete3'] : '' ?>">
-                </div>
-                <div class="precio-item">
-                    <label>Jumbo - Unidad:</label>
-                    <input type="number" name="precio_jumbo_unidad" step="0.01" min="0" required value="<?= isset($precios['jumbo']['unidad']) ? $precios['jumbo']['unidad'] : '' ?>">
-                </div>
-                <div class="precio-item">
-                    <label>Jumbo - Paquete de 3:</label>
-                    <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required value="<?= isset($precios['jumbo']['paquete3']) ? $precios['jumbo']['paquete3'] : '' ?>">
+            <div class="form-group">
+                <h3 style="color:#a14a7f;">Precios por Tamaño</h3>
+                <div class="precios-grid">
+                    <div class="precio-item">
+                        <label>Precio Normal:</label>
+                        <input type="number" name="precio_normal" step="0.01" min="0" required value="<?= isset($precios['normal']['unidad']) ? $precios['normal']['unidad'] : '' ?>">
+                    </div>
+                    <div class="precio-item">
+                        <label>Precio Jumbo:</label>
+                        <input type="number" name="precio_jumbo" step="0.01" min="0" required value="<?= isset($precios['jumbo']['unidad']) ? $precios['jumbo']['unidad'] : '' ?>">
+                    </div>
+                    <div class="precio-item">
+                        <label>Precio Paquete 3 Normal:</label>
+                        <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required value="<?= isset($precios['normal']['paquete3']) ? $precios['normal']['paquete3'] : '' ?>">
+                    </div>
+                    <div class="precio-item">
+                        <label>Precio Paquete 3 Jumbo:</label>
+                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required value="<?= isset($precios['jumbo']['paquete3']) ? $precios['jumbo']['paquete3'] : '' ?>">
+                    </div>
                 </div>
             </div>
 
-            <label>Imagen (dejar vacío para mantener actual):</label><br>
-            <input type="file" name="imagen" accept="image/*"><br><br>
+            <div class="form-group">
+                <label>Imagen actual:</label>
+                <img src="../../assets/img/<?= htmlspecialchars($producto['imagen']) ?>" alt="Imagen actual" style="max-width:200px;margin:10px 0;">
+                <label for="imagen">Nueva imagen (opcional):</label>
+                <input type="file" id="imagen" name="imagen" accept="image/*">
+                <small style="color:#a14a7f;">Solo imágenes JPG, PNG o WebP. Tamaño recomendado: 400x400px.</small>
+            </div>
 
-            <button type="submit" class="btn">Guardar Cambios</button>
+            <button type="submit" class="btn btn-agregar" style="width:100%;margin-top:18px;">Guardar Cambios</button>
         </form>
     </div>
+    <script>
+    document.getElementById('editarForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nombre = document.getElementById('nombre').value.trim();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const imagen = document.getElementById('imagen').files[0];
+        
+        if (nombre.length < 3) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El nombre debe tener al menos 3 caracteres',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        if (descripcion.length < 10) {
+            Swal.fire({
+                title: 'Error',
+                text: 'La descripción debe tener al menos 10 caracteres',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        if (imagen) {
+            // Validar tipo de imagen
+            const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!tiposPermitidos.includes(imagen.type)) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Solo se permiten imágenes en formato JPG, PNG o WebP',
+                    icon: 'error',
+                    confirmButtonColor: '#a14a7f'
+                });
+                return;
+            }
+            
+            // Validar tamaño de imagen (máximo 5MB)
+            if (imagen.size > 5 * 1024 * 1024) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'La imagen no debe superar los 5MB',
+                    icon: 'error',
+                    confirmButtonColor: '#a14a7f'
+                });
+                return;
+            }
+        }
+        
+        // Confirmar antes de guardar
+        Swal.fire({
+            title: '¿Guardar cambios?',
+            text: '¿Estás seguro de que deseas guardar los cambios?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#a14a7f',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+
+    // Mostrar mensajes de error del servidor
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        title: 'Error',
+        text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+        icon: 'error',
+        confirmButtonColor: '#a14a7f'
+    });
+    <?php endif; ?>
+    </script>
 </body>
 <script>
 document.getElementById('hamburger-btn').addEventListener('click', function() {

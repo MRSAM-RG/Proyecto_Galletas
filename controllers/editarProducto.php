@@ -19,48 +19,101 @@ if (!$id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nombre = filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING);
-    $descripcion = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_STRING);
-    $precio = floatval($_POST['precio']);
-    $factor_diferencial = filter_input(INPUT_POST, 'factor_diferencial', FILTER_SANITIZE_STRING);
+    $id = $_POST['id'];
+    $nombre = $_POST['nombre'];
+    $descripcion = $_POST['descripcion'];
+    
+    // Validar que los precios existan y sean números válidos
+    $precio_normal = isset($_POST['precio_normal']) ? floatval($_POST['precio_normal']) : 0;
+    $precio_jumbo = isset($_POST['precio_jumbo']) ? floatval($_POST['precio_jumbo']) : 0;
+    $precio_normal_paquete3 = isset($_POST['precio_normal_paquete3']) ? floatval($_POST['precio_normal_paquete3']) : 0;
+    $precio_jumbo_paquete3 = isset($_POST['precio_jumbo_paquete3']) ? floatval($_POST['precio_jumbo_paquete3']) : 0;
 
-    $imagen = null;
-    if (!empty($_FILES['imagen']['name'])) {
-        $imagen = $_FILES['imagen']['name'];
-        $rutaDestino = '../assets/img/' . basename($imagen);
-        if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
-            header('Location: ../views/admin/admin.php?error=Error al subir la imagen');
+    // Validar que los precios sean mayores a 0
+    if ($precio_normal <= 0 || $precio_jumbo <= 0 || $precio_normal_paquete3 <= 0 || $precio_jumbo_paquete3 <= 0) {
+        header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=Los precios deben ser mayores a 0');
+        exit();
+    }
+
+    // Actualizar información básica del producto
+    $stmt = $db->conexion->prepare("UPDATE productos SET nombre = ?, descripcion = ? WHERE id = ?");
+    $stmt->bind_param("ssi", $nombre, $descripcion, $id);
+    
+    if (!$stmt->execute()) {
+        $db->desconectar();
+        header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=Error al actualizar el producto');
+        exit();
+    }
+
+    // Actualizar precios
+    // Primero eliminamos los precios existentes
+    $stmt = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    // Insertar los nuevos precios
+    $stmt = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
+    
+    // Precio Normal Unidad
+    $tamano = 'normal';
+    $presentacion = 'unidad';
+    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_normal);
+    $stmt->execute();
+
+    // Precio Jumbo Unidad
+    $tamano = 'jumbo';
+    $presentacion = 'unidad';
+    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_jumbo);
+    $stmt->execute();
+
+    // Precio Normal Paquete 3
+    $tamano = 'normal';
+    $presentacion = 'paquete3';
+    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_normal_paquete3);
+    $stmt->execute();
+
+    // Precio Jumbo Paquete 3
+    $tamano = 'jumbo';
+    $presentacion = 'paquete3';
+    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_jumbo_paquete3);
+    $stmt->execute();
+
+    // Procesar la imagen si se subió una nueva
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+        $imagen = $_FILES['imagen'];
+        $tipo = $imagen['type'];
+        $tamano = $imagen['size'];
+        $temp = $imagen['tmp_name'];
+        
+        // Validar tipo de archivo
+        if ($tipo !== 'image/jpeg' && $tipo !== 'image/png' && $tipo !== 'image/webp') {
+            $db->desconectar();
+            header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=Tipo de archivo no permitido');
             exit();
         }
-    } else {
-        $imagen = null;
+        
+        // Validar tamaño (5MB máximo)
+        if ($tamano > 5 * 1024 * 1024) {
+            $db->desconectar();
+            header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=La imagen es demasiado grande');
+            exit();
+        }
+        
+        // Generar nombre único
+        $extension = pathinfo($imagen['name'], PATHINFO_EXTENSION);
+        $nombre_archivo = uniqid() . '.' . $extension;
+        
+        // Mover archivo
+        if (move_uploaded_file($temp, '../assets/img/' . $nombre_archivo)) {
+            // Actualizar nombre de imagen en la base de datos
+            $stmt = $db->conexion->prepare("UPDATE productos SET imagen = ? WHERE id = ?");
+            $stmt->bind_param("si", $nombre_archivo, $id);
+            $stmt->execute();
+        }
     }
 
-    if ($queryManager->updateProduct($id, $nombre, $descripcion, $precio, $factor_diferencial, $imagen)) {
-        // Actualizar precios por tamaño y presentación
-        $precios = [
-            ['normal', 'unidad', $_POST['precio_normal_unidad']],
-            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
-            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
-            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
-        ];
-        // Eliminar precios anteriores
-        $stmt_del = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
-        $stmt_del->bind_param('i', $id);
-        $stmt_del->execute();
-        // Insertar nuevos precios
-        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
-        foreach ($precios as $precio) {
-            $stmt_precios->bind_param('issd', $id, $precio[0], $precio[1], $precio[2]);
-            $stmt_precios->execute();
-        }
-        header('Location: ../views/admin/admin.php?success=Producto actualizado correctamente');
-    } else {
-        if ($imagen) {
-            unlink('../assets/img/' . $imagen);
-        }
-        header('Location: ../views/admin/admin.php?error=Error al actualizar el producto');
-    }
+    $db->desconectar();
+    header('Location: ../views/admin/productos.php?success=Producto actualizado correctamente');
     exit();
 }
 

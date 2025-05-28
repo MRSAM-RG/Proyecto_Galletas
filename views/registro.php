@@ -15,6 +15,7 @@ if (isset($_SESSION['usuario_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Galletas</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -47,7 +48,7 @@ if (isset($_SESSION['usuario_id'])) {
                 <?php echo htmlspecialchars($_GET['error']); ?>
             </div>
         <?php endif; ?>
-        <form action="../controllers/registro.php" method="POST">
+        <form action="../controllers/registro.php" method="POST" id="registroForm">
             <label for="nombre">Nombre Completo</label>
             <input type="text" id="nombre" name="nombre" required>
             <label for="email">Correo Electrónico</label>
@@ -80,5 +81,99 @@ function updateCartCount() {
         });
 }
 updateCartCount();
+
+// Validación del formulario de registro
+document.getElementById('registroForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    // Validaciones
+    if (nombre.length < 3) {
+        Swal.fire({
+            title: 'Error',
+            text: 'El nombre debe tener al menos 3 caracteres',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Por favor ingresa un email válido',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (password.length < 8) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La contraseña debe tener al menos 8 caracteres',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (!password.match(/[A-Z]/)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La contraseña debe contener al menos una letra mayúscula',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (!password.match(/[a-z]/)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La contraseña debe contener al menos una letra minúscula',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (!password.match(/[0-9]/)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La contraseña debe contener al menos un número',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Las contraseñas no coinciden',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    // Si todo está bien, enviar el formulario
+    this.submit();
+});
+
+// Mostrar mensajes de error del servidor
+<?php if (isset($_GET['error'])): ?>
+Swal.fire({
+    title: 'Error',
+    text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+    icon: 'error',
+    confirmButtonColor: '#a14a7f'
+});
+<?php endif; ?>
 </script>
 </html>

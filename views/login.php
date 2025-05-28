@@ -15,6 +15,7 @@ if (isset($_SESSION['usuario_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Galletas</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -42,12 +43,7 @@ if (isset($_SESSION['usuario_id'])) {
     </nav>
     <div class="login-container">
         <h1>Iniciar Sesión</h1>
-        <?php if (isset($_GET['error'])): ?>
-            <div class="error">
-                <?php echo htmlspecialchars($_GET['error']); ?>
-            </div>
-        <?php endif; ?>
-        <form action="../controllers/login.php" method="POST">
+        <form action="../controllers/login.php" method="POST" id="loginForm">
             <label for="email">Correo Electrónico</label>
             <input type="email" id="email" name="email" required>
             <label for="password">Contraseña</label>
@@ -63,6 +59,46 @@ if (isset($_SESSION['usuario_id'])) {
 document.getElementById('hamburger-btn').addEventListener('click', function() {
     document.querySelector('.nav-links').classList.toggle('open');
 });
+
+// Validación del formulario de login
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Por favor ingresa un email válido',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    if (password.length < 6) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La contraseña debe tener al menos 6 caracteres',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        return;
+    }
+    
+    this.submit();
+});
+
+// Mostrar mensajes de error del servidor
+<?php if (isset($_GET['error'])): ?>
+Swal.fire({
+    title: 'Error',
+    text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+    icon: 'error',
+    confirmButtonColor: '#a14a7f'
+});
+<?php endif; ?>
 
 // Actualiza el contador del carrito
 function updateCartCount() {

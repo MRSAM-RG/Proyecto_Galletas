@@ -16,21 +16,15 @@ $productos = $queryManager->getAllProducts(false);
 
 // Obtener precios para todos los productos
 $precios = [];
-$stmt = $db->conexion->prepare("SELECT producto_id, tamano, precio FROM precios_productos WHERE presentacion = 'unidad'");
+$stmt = $db->conexion->prepare("SELECT producto_id, tamano, presentacion, precio FROM precios_productos");
 $stmt->execute();
 $result_precios = $stmt->get_result();
 while ($row = $result_precios->fetch_assoc()) {
-    $precios[$row['producto_id']][$row['tamano']] = $row['precio'];
+    if (!isset($precios[$row['producto_id']])) $precios[$row['producto_id']] = [];
+    if (!isset($precios[$row['producto_id']][$row['tamano']])) $precios[$row['producto_id']][$row['tamano']] = [];
+    $precios[$row['producto_id']][$row['tamano']][$row['presentacion']] = $row['precio'];
 }
 
-// Obtener stock de todos los productos
-$stocks = [];
-$result_stock = $db->conexion->query("SELECT producto_id, tamano, stock FROM stock_productos");
-while ($row = $result_stock->fetch_assoc()) {
-    $pid = $row['producto_id'];
-    $tam = $row['tamano'];
-    $stocks[$pid][$tam] = $row['stock'];
-}
 $db->desconectar();
 ?>
 <!DOCTYPE html>
@@ -41,6 +35,46 @@ $db->desconectar();
     <title>Gestión de Productos</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/pedidos.css">
+    <script src="../../assets/js/sweetalert2.all.min.js"></script>
+    <style>
+    /* Responsive table */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+    }
+    table {
+        width: 100%;
+        min-width: 700px;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 0.7em 0.5em;
+        text-align: left;
+        white-space: nowrap;
+    }
+    .acciones-flex {
+        display: flex;
+        gap: 0.5em;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    @media (max-width: 900px) {
+        table { min-width: 600px; }
+        .login-container { padding: 0; }
+    }
+    @media (max-width: 600px) {
+        table { min-width: 500px; font-size: 0.95em; }
+        .login-container { padding: 0; }
+        th, td { padding: 0.5em 0.3em; }
+        .acciones-flex {
+            flex-direction: column;
+            gap: 0.3em;
+            align-items: stretch;
+        }
+        .btn-editar, .btn-eliminar { width: 100%; margin-bottom: 0; }
+    }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -62,40 +96,87 @@ $db->desconectar();
     <div class="login-container" style="max-width:900px;">
         <h1>Gestión de Productos</h1>
         <a href="../admin/agregarProducto.php" class="btn" style="margin-bottom:1.5rem;display:inline-block;">+ Agregar Producto</a>
-        
-            <table>
-                <thead>
+        <?php if (isset($_GET['error'])): ?>
+            <div class="error"><?php echo htmlspecialchars($_GET['error']); ?></div>
+        <?php endif; ?>
+        <?php if (isset($_GET['success'])): ?>
+            <div class="success"><?php echo htmlspecialchars($_GET['success']); ?></div>
+        <?php endif; ?>
+        <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio Normal</th>
+                    <th>Precio Jumbo</th>
+                    <th>Precio Paq. 3 Normal</th>
+                    <th>Precio Paq. 3 Jumbo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($producto = $productos->fetch_assoc()): ?>
                     <tr>
-                        <th>Imagen</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio Normal (Unidad)</th>
-                        <th>Precio Jumbo (Unidad)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($producto = $productos->fetch_assoc()): ?>
-                    <?php
-                    $precio_normal_unidad = isset($precios[$producto['id']]['normal']) ? '$' . number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A';
-                    $precio_jumbo_unidad = isset($precios[$producto['id']]['jumbo']) ? '$' . number_format($precios[$producto['id']]['jumbo'], 0, ',', '.') : 'N/A';
-                    ?>
-                    <tr>
-                        <td><img src="../../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="img" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></td>
+                        <td><?php echo $producto['id']; ?></td>
+                        <td><img src="../../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" style="width:50px;height:50px;object-fit:cover;"></td>
                         <td><?php echo htmlspecialchars_decode($producto['nombre']); ?></td>
                         <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
-                        <td><?= $precio_normal_unidad ?></td>
-                        <td><?= $precio_jumbo_unidad ?></td>
+                        <td>$<?= isset($precios[$producto['id']]['normal']['unidad']) ? number_format($precios[$producto['id']]['normal']['unidad'], 0, ',', '.') : 'N/A' ?></td>
+                        <td>$<?= isset($precios[$producto['id']]['jumbo']['unidad']) ? number_format($precios[$producto['id']]['jumbo']['unidad'], 0, ',', '.') : 'N/A' ?></td>
+                        <td>$<?= isset($precios[$producto['id']]['normal']['paquete3']) ? number_format($precios[$producto['id']]['normal']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
+                        <td>$<?= isset($precios[$producto['id']]['jumbo']['paquete3']) ? number_format($precios[$producto['id']]['jumbo']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
                         <td>
-                            <a href="editarProducto.php?id=<?php echo $producto['id']; ?>">Editar</a> |
-                            <a href="../../controllers/eliminarProducto.php?id=<?php echo $producto['id']; ?>" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
+                            <div class="acciones-flex">
+                                <button onclick="window.location.href='editarProducto.php?id=<?php echo $producto['id']; ?>'" class="btn-editar">Editar</button>
+                                <button onclick="confirmarEliminacion(<?php echo $producto['id']; ?>)" class="btn-eliminar">Eliminar</button>
+                            </div>
                         </td>
                     </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+        </div>
     </div>
+    <script>
+    function confirmarEliminacion(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `../../controllers/eliminarProducto.php?id=${id}`;
+            }
+        });
+    }
+
+    // Mostrar mensajes de éxito o error
+    <?php if (isset($_GET['success'])): ?>
+    Swal.fire({
+        title: '¡Éxito!',
+        text: '<?php echo htmlspecialchars($_GET['success']); ?>',
+        icon: 'success',
+        confirmButtonColor: '#a14a7f'
+    });
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        title: 'Error',
+        text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+        icon: 'error',
+        confirmButtonColor: '#a14a7f'
+    });
+    <?php endif; ?>
+    </script>
 </body>
 <script>
 document.getElementById('hamburger-btn').addEventListener('click', function() {

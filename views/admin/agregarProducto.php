@@ -15,6 +15,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
     <title>Agregar Producto</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/pedidos.css">
+    <script src="../../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
 <nav class="navbar">
@@ -36,12 +37,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
 
     <div class="login-container" style="max-width:480px;">
         <h1 style="color:#a14a7f;font-size:2.3rem;margin-bottom:1.2rem;">Agregar Producto</h1>
-        <?php if (isset($_GET['error'])): ?>
-            <div class="error">
-                <?php echo htmlspecialchars($_GET['error']); ?>
-            </div>
-        <?php endif; ?>
-        <form action="../../controllers/agregarProducto.php" method="POST" enctype="multipart/form-data" style="text-align:left;">
+        <form action="../../controllers/agregarProducto.php" method="POST" enctype="multipart/form-data" id="productoForm" style="text-align:left;">
             <div class="form-group">
                 <label for="nombre">Nombre del Producto</label>
                 <input type="text" id="nombre" name="nombre" required placeholder="Ej: Galleta de chocolate">
@@ -51,27 +47,23 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
                 <textarea id="descripcion" name="descripcion" required placeholder="Describe el producto..." style="resize:vertical;"></textarea>
             </div>
             <div class="form-group">
-                <label for="precio">Precio Base</label>
-                <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="Ej: 25000 (25.000)">
-            </div>
-            <div class="form-group">
-                <h3>Precios por Tamaño y Presentación</h3>
+                <h3>Precios por Tamaño</h3>
                 <div class="precios-grid">
                     <div class="precio-item">
-                        <label>Normal - Unidad:</label>
-                        <input type="number" name="precio_normal_unidad" step="0.01" min="0" required>
+                        <label>Precio Normal:</label>
+                        <input type="number" name="precio_normal" step="0.01" min="0" required placeholder="Ej: 25000">
                     </div>
                     <div class="precio-item">
-                        <label>Normal - Paquete de 3:</label>
-                        <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required>
+                        <label>Precio Jumbo:</label>
+                        <input type="number" name="precio_jumbo" step="0.01" min="0" required placeholder="Ej: 35000">
                     </div>
                     <div class="precio-item">
-                        <label>Jumbo - Unidad:</label>
-                        <input type="number" name="precio_jumbo_unidad" step="0.01" min="0" required>
+                        <label>Precio Paquete 3 Normal:</label>
+                        <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required placeholder="Ej: 70000">
                     </div>
                     <div class="precio-item">
-                        <label>Jumbo - Paquete de 3:</label>
-                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required>
+                        <label>Precio Paquete 3 Jumbo:</label>
+                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required placeholder="Ej: 100000">
                     </div>
                 </div>
             </div>
@@ -115,6 +107,80 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
             });
     }
     updateCartCount();
+    </script>
+    <script>
+    document.getElementById('productoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nombre = document.getElementById('nombre').value.trim();
+        const descripcion = document.getElementById('descripcion').value.trim();
+        const imagen = document.getElementById('imagen').files[0];
+        
+        if (nombre.length < 3) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El nombre debe tener al menos 3 caracteres',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        if (descripcion.length < 10) {
+            Swal.fire({
+                title: 'Error',
+                text: 'La descripción debe tener al menos 10 caracteres',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        if (!imagen) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debes seleccionar una imagen',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        // Validar tipo de imagen
+        const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!tiposPermitidos.includes(imagen.type)) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Solo se permiten imágenes en formato JPG, PNG o WebP',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        // Validar tamaño de imagen (máximo 5MB)
+        if (imagen.size > 5 * 1024 * 1024) {
+            Swal.fire({
+                title: 'Error',
+                text: 'La imagen no debe superar los 5MB',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+        
+        this.submit();
+    });
+
+    // Mostrar mensajes de error del servidor
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        title: 'Error',
+        text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+        icon: 'error',
+        confirmButtonColor: '#a14a7f'
+    });
+    <?php endif; ?>
     </script>
 </body>
 </html> 

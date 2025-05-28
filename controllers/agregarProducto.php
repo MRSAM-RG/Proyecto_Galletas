@@ -12,111 +12,101 @@ $db = new MySQL();
 $db->conectar();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitización de datos
-    $nombre = filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING);
-    $descripcion = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_STRING);
-    $precio = filter_input(INPUT_POST, 'precio', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    $nombre = $_POST['nombre'];
+    $descripcion = $_POST['descripcion'];
+    
+    // Validar que los precios existan y sean números válidos
+    $precio_normal = isset($_POST['precio_normal']) ? floatval($_POST['precio_normal']) : 0;
+    $precio_jumbo = isset($_POST['precio_jumbo']) ? floatval($_POST['precio_jumbo']) : 0;
+    $precio_normal_paquete3 = isset($_POST['precio_normal_paquete3']) ? floatval($_POST['precio_normal_paquete3']) : 0;
+    $precio_jumbo_paquete3 = isset($_POST['precio_jumbo_paquete3']) ? floatval($_POST['precio_jumbo_paquete3']) : 0;
 
-    // Validación de campos vacíos
-    if (empty($nombre) || empty($descripcion) || empty($precio)) {
-        header('Location: ../views/admin/admin.php?error=Todos los campos son obligatorios');
+    // Validar que los precios sean mayores a 0
+    if ($precio_normal <= 0 || $precio_jumbo <= 0 || $precio_normal_paquete3 <= 0 || $precio_jumbo_paquete3 <= 0) {
+        header('Location: ../views/admin/agregarProducto.php?error=Los precios deben ser mayores a 0');
         exit();
     }
 
-    // Validación de longitud
-    if (strlen($nombre) < 3 || strlen($nombre) > 100) {
-        header('Location: ../views/admin/admin.php?error=El nombre debe tener entre 3 y 100 caracteres');
-        exit();
-    }
-
-    if (strlen($descripcion) > 500) {
-        header('Location: ../views/admin/admin.php?error=La descripción no puede exceder los 500 caracteres');
-        exit();
-    }
-
-    // Validación del precio
-    if ($precio <= 0) {
-        header('Location: ../views/admin/admin.php?error=El precio debe ser mayor a 0');
-        exit();
-    }
-
-    // Validación de la imagen
+    // Validar y procesar la imagen
     if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
-        header('Location: ../views/admin/admin.php?error=Error al subir la imagen');
+        header('Location: ../views/admin/agregarProducto.php?error=Debe seleccionar una imagen');
         exit();
     }
 
-    // Validación del tipo de archivo
-    $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
-    $tipoArchivo = $_FILES['imagen']['type'];
+    $imagen = $_FILES['imagen'];
+    $tipo = $imagen['type'];
+    $tamano = $imagen['size'];
+    $temp = $imagen['tmp_name'];
     
-    if (!in_array($tipoArchivo, $tiposPermitidos)) {
-        header('Location: ../views/admin/admin.php?error=Formato de imagen no permitido. Use JPG, PNG o GIF');
+    // Validar tipo de archivo
+    if ($tipo !== 'image/jpeg' && $tipo !== 'image/png' && $tipo !== 'image/webp') {
+        header('Location: ../views/admin/agregarProducto.php?error=Tipo de archivo no permitido');
         exit();
     }
-
-    // Validación del tamaño de la imagen (máximo 5MB)
-    if ($_FILES['imagen']['size'] > 5242880) {
-        header('Location: ../views/admin/admin.php?error=La imagen no puede ser mayor a 5MB');
+    
+    // Validar tamaño (5MB máximo)
+    if ($tamano > 5 * 1024 * 1024) {
+        header('Location: ../views/admin/agregarProducto.php?error=La imagen es demasiado grande');
         exit();
     }
-
+    
     // Generar nombre único para la imagen
-    $extension = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
-    $nombreImagen = uniqid() . '.' . $extension;
-    $rutaDestino = '../assets/img/' . $nombreImagen;
-
-    // Mover la imagen a la carpeta de imágenes
-    if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
-        header('Location: ../views/admin/admin.php?error=Error al guardar la imagen');
+    $extension = pathinfo($imagen['name'], PATHINFO_EXTENSION);
+    $nombre_archivo = uniqid() . '.' . $extension;
+    
+    // Insertar el producto
+    $stmt = $db->conexion->prepare("INSERT INTO productos (nombre, descripcion, imagen) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $nombre, $descripcion, $nombre_archivo);
+    
+    if (!$stmt->execute()) {
+        $db->desconectar();
+        header('Location: ../views/admin/agregarProducto.php?error=Error al crear el producto');
         exit();
     }
 
-    // Sanitización adicional
-    $nombre = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
-    $descripcion = htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8');
+    $producto_id = $db->conexion->insert_id;
 
-    // Usar consultas preparadas para prevenir SQL injection
-    $stmt = $db->conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssds", $nombre, $descripcion, $precio, $nombreImagen);
+    // Insertar los precios
+    $stmt = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
     
-    if ($stmt->execute()) {
-        // Obtener el ID del producto recién insertado
-        $producto_id = $stmt->insert_id;
-        
-        // Insertar los precios específicos
-        $precios = [
-            ['normal', 'unidad', $_POST['precio_normal_unidad']],
-            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
-            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
-            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
-        ];
-        
-        $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
-        
-        foreach ($precios as $precio) {
-            $stmt_precios->bind_param('issd', $producto_id, $precio[0], $precio[1], $precio[2]);
-            $stmt_precios->execute();
-        }
-        
-        // Obtener los valores de stock desde el formulario
-        $stock_normal = isset($_POST['stock_normal']) ? intval($_POST['stock_normal']) : 0;
-        $stock_jumbo = isset($_POST['stock_jumbo']) ? intval($_POST['stock_jumbo']) : 0;
-        // Insertar stock para tamaño normal
-        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'normal', ?)");
-        $stmt_stock->bind_param('ii', $producto_id, $stock_normal);
-        $stmt_stock->execute();
-        // Insertar stock para tamaño jumbo
-        $stmt_stock = $db->conexion->prepare("INSERT INTO stock (producto_id, tamano, stock) VALUES (?, 'jumbo', ?)");
-        $stmt_stock->bind_param('ii', $producto_id, $stock_jumbo);
-        $stmt_stock->execute();
-        header('Location: ../views/admin/admin.php?success=Producto agregado correctamente');
+    // Precio Normal Unidad
+    $tamano = 'normal';
+    $presentacion = 'unidad';
+    $stmt->bind_param("issd", $producto_id, $tamano, $presentacion, $precio_normal);
+    $stmt->execute();
+
+    // Precio Jumbo Unidad
+    $tamano = 'jumbo';
+    $presentacion = 'unidad';
+    $stmt->bind_param("issd", $producto_id, $tamano, $presentacion, $precio_jumbo);
+    $stmt->execute();
+
+    // Precio Normal Paquete 3
+    $tamano = 'normal';
+    $presentacion = 'paquete3';
+    $stmt->bind_param("issd", $producto_id, $tamano, $presentacion, $precio_normal_paquete3);
+    $stmt->execute();
+
+    // Precio Jumbo Paquete 3
+    $tamano = 'jumbo';
+    $presentacion = 'paquete3';
+    $stmt->bind_param("issd", $producto_id, $tamano, $presentacion, $precio_jumbo_paquete3);
+    $stmt->execute();
+
+    // Mover la imagen
+    if (move_uploaded_file($temp, '../assets/img/' . $nombre_archivo)) {
+        $db->desconectar();
+        header('Location: ../views/admin/productos.php?success=Producto agregado correctamente');
+        exit();
     } else {
-        // Si hay error, eliminar la imagen subida
-        unlink($rutaDestino);
-        header('Location: ../views/admin/admin.php?error=Error al agregar el producto');
+        // Si falla al mover la imagen, eliminar el producto
+        $stmt = $db->conexion->prepare("DELETE FROM productos WHERE id = ?");
+        $stmt->bind_param("i", $producto_id);
+        $stmt->execute();
+        $db->desconectar();
+        header('Location: ../views/admin/agregarProducto.php?error=Error al subir la imagen');
+        exit();
     }
-    exit();
 }
 
 $db->desconectar();

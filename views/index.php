@@ -251,6 +251,46 @@ window.addEventListener('DOMContentLoaded', function() {
         actualizarPrecio(id);
     });
 });
+
+// Manejo del formulario de contacto
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('../controllers/contact.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.includes('Mensaje enviado correctamente')) {
+            Swal.fire({
+                title: '¡Mensaje Enviado!',
+                text: 'Gracias por contactarnos. Te responderemos pronto.',
+                icon: 'success',
+                confirmButtonColor: '#a14a7f'
+            }).then(() => {
+                this.reset();
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente.',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente.',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+    });
+});
 </script>
 <?php if (isset($_GET['stock_error'])): ?>
 <script>

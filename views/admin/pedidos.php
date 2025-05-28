@@ -45,6 +45,7 @@ $db->desconectar();
     <link rel="stylesheet" href="../../assets/css/pedidos.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../../assets/js/sweetalert2.all.min.js"></script>
     <style>
         .btn-rosa {
             background: #ffb3c6;
@@ -109,7 +110,7 @@ $db->desconectar();
                         <span><b>Dirección:</b> <?php echo htmlspecialchars($pedido['direccion']); ?></span>
                         <span><b>Teléfono:</b> <?php echo htmlspecialchars($pedido['telefono']); ?></span>
                         <?php if ($pedido['estado'] === 'pendiente'): ?>
-                            <a href="../../controllers/cambiar_estado_pedido.php?id=<?php echo $pedido['id']; ?>" class="btn-completar" onclick="return confirm('¿Marcar este pedido como completado?')">Marcar como Completado</a>
+                            <a href="../../controllers/cambiar_estado_pedido.php?id=<?php echo $pedido['id']; ?>" class="btn-completar" onclick="return confirmarCambioEstado(event, <?php echo $pedido['id']; ?>)">Marcar como Completado</a>
                         <?php endif; ?>
                         <button type="button" class="btn btn-rosa" data-bs-toggle="modal" data-bs-target="#modalDetalles<?php echo $modalIndex; ?>">Ver detalles</button>
                     </div>
@@ -173,5 +174,46 @@ $db->desconectar();
     </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmarCambioEstado(event, pedidoId) {
+            event.preventDefault();
+            
+            Swal.fire({
+                title: '¿Confirmar cambio de estado?',
+                text: '¿Estás seguro de que deseas marcar este pedido como completado?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#a14a7f',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, completar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `../../controllers/cambiar_estado_pedido.php?id=${pedidoId}`;
+                }
+            });
+            
+            return false;
+        }
+
+        // Mostrar mensajes de éxito o error
+        <?php if (isset($_GET['success'])): ?>
+        Swal.fire({
+            title: '¡Éxito!',
+            text: '<?php echo htmlspecialchars($_GET['success']); ?>',
+            icon: 'success',
+            confirmButtonColor: '#a14a7f'
+        });
+        <?php endif; ?>
+
+        <?php if (isset($_GET['error'])): ?>
+        Swal.fire({
+            title: 'Error',
+            text: '<?php echo htmlspecialchars($_GET['error']); ?>',
+            icon: 'error',
+            confirmButtonColor: '#a14a7f'
+        });
+        <?php endif; ?>
+    </script>
 </body>
 </html> 
