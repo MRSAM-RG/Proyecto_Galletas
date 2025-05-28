@@ -12,6 +12,12 @@ $db = new MySQL();
 $db->conectar();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../config/security.php';
+    if (!isset($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])) {
+        header('Location: ../views/admin/agregarProducto.php?error=Token CSRF inválido');
+        exit();
+    }
+
     $nombre = $_POST['nombre'];
     $descripcion = $_POST['descripcion'];
     

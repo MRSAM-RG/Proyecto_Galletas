@@ -38,6 +38,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
     <div class="login-container" style="max-width:480px;">
         <h1 style="color:#a14a7f;font-size:2.3rem;margin-bottom:1.2rem;">Agregar Producto</h1>
         <form action="../../controllers/agregarProducto.php" method="POST" enctype="multipart/form-data" id="productoForm" style="text-align:left;">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generate_csrf_token()); ?>">
             <div class="form-group">
                 <label for="nombre">Nombre del Producto</label>
                 <input type="text" id="nombre" name="nombre" required placeholder="Ej: Galleta de chocolate">

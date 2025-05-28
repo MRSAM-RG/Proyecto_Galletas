@@ -1,6 +1,7 @@
 <?php
 require_once '../../models/MySQL.php';
 require_once '../../models/QueryManager.php';
+require_once '../../config/security.php';
 session_start();
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
@@ -56,6 +57,7 @@ if (!$producto) {
     <div class="login-container">
         <h1 style="color:#a14a7f;font-size:2.3rem;margin-bottom:1.2rem;">Editar Producto</h1>
         <form action="../../controllers/editarProducto.php" method="POST" enctype="multipart/form-data" id="editarForm">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generate_csrf_token()); ?>">
             <input type="hidden" name="id" value="<?= htmlspecialchars($_GET['id']) ?>">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
