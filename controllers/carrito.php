@@ -22,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar y sanitizar entrada
     $producto_id = filter_input(INPUT_POST, 'producto_id', FILTER_VALIDATE_INT);
     $cantidad = filter_input(INPUT_POST, 'cantidad', FILTER_VALIDATE_INT, ['options' => ['default' => 1, 'min_range' => 1, 'max_range' => 99]]);
-    $tamano = isset($_POST['tamano']) && in_array($_POST['tamano'], ['normal','jumbo']) ? $_POST['tamano'] : 'normal';
-    $presentacion = isset($_POST['presentacion']) && in_array($_POST['presentacion'], ['unidad','paquete3']) ? $_POST['presentacion'] : 'unidad';
+    $tamano = 'normal';
+    $presentacion = isset($_POST['presentacion']) && in_array($_POST['presentacion'], ['unidad','paquete3','paquete_mixto']) ? $_POST['presentacion'] : 'unidad';
 
     if (!$producto_id) {
         header('Location: ../views/index.php?error=Producto inválido');
@@ -52,13 +52,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $precio = $precio_row['precio'];
 
-    // Eliminar verificación de stock
     $usuario_id = $_SESSION['usuario_id'];
 
     // Verificar si ya existe en el carrito
     $carrito_item = $queryManager->getCartItem($usuario_id, $producto_id, $tamano, $presentacion);
     $cantidad_en_carrito = $carrito_item ? intval($carrito_item['cantidad']) : 0;
     $nueva_cantidad = $cantidad_en_carrito + $cantidad;
+
+    // Calcular el total de galletas en el carrito
+    $total_galletas = $queryManager->getCartCount($usuario_id);
+    $galletas_a_agregar = $presentacion === 'paquete3' || $presentacion === 'paquete_mixto' ? $cantidad * 3 : $cantidad;
+    $total_despues_agregar = $total_galletas + $galletas_a_agregar;
+
+    // Verificar si excede el límite de 25 galletas
+    if ($total_despues_agregar > 25) {
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Has excedido el límite de 25 galletas. Para pedidos mayores, por favor contáctanos por correo.',
+                'limit_exceeded' => true
+            ]);
+            exit();
+        } else {
+            header('Location: ../views/index.php?error=Has excedido el límite de 25 galletas. Para pedidos mayores, por favor contáctanos por correo.');
+            exit();
+        }
+    }
 
     if ($carrito_item) {
         if ($queryManager->updateCartItem($carrito_item['id'], $nueva_cantidad)) {

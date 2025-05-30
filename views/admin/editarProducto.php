@@ -77,16 +77,12 @@ if (!$producto) {
                         <input type="number" name="precio_normal" step="0.01" min="0" required value="<?= isset($precios['normal']['unidad']) ? $precios['normal']['unidad'] : '' ?>">
                     </div>
                     <div class="precio-item">
-                        <label>Precio Jumbo:</label>
-                        <input type="number" name="precio_jumbo" step="0.01" min="0" required value="<?= isset($precios['jumbo']['unidad']) ? $precios['jumbo']['unidad'] : '' ?>">
-                    </div>
-                    <div class="precio-item">
                         <label>Precio Paquete 3 Normal:</label>
                         <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required value="<?= isset($precios['normal']['paquete3']) ? $precios['normal']['paquete3'] : '' ?>">
                     </div>
                     <div class="precio-item">
-                        <label>Precio Paquete 3 Jumbo:</label>
-                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required value="<?= isset($precios['jumbo']['paquete3']) ? $precios['jumbo']['paquete3'] : '' ?>">
+                        <label>Precio Paquete Mixto Normal:</label>
+                        <input type="number" name="precio_normal_paquete_mixto" step="0.01" min="0" required value="<?= isset($precios['normal']['paquete_mixto']) ? $precios['normal']['paquete_mixto'] : '' ?>">
                     </div>
                 </div>
             </div>

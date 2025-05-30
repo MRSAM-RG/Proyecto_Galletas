@@ -30,12 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validar que los precios existan y sean números válidos
     $precio_normal = isset($_POST['precio_normal']) ? floatval($_POST['precio_normal']) : 0;
-    $precio_jumbo = isset($_POST['precio_jumbo']) ? floatval($_POST['precio_jumbo']) : 0;
     $precio_normal_paquete3 = isset($_POST['precio_normal_paquete3']) ? floatval($_POST['precio_normal_paquete3']) : 0;
-    $precio_jumbo_paquete3 = isset($_POST['precio_jumbo_paquete3']) ? floatval($_POST['precio_jumbo_paquete3']) : 0;
+    $precio_normal_paquete_mixto = isset($_POST['precio_normal_paquete_mixto']) ? floatval($_POST['precio_normal_paquete_mixto']) : 0;
 
     // Validar que los precios sean mayores a 0
-    if ($precio_normal <= 0 || $precio_jumbo <= 0 || $precio_normal_paquete3 <= 0 || $precio_jumbo_paquete3 <= 0) {
+    if ($precio_normal <= 0 || $precio_normal_paquete3 <= 0 || $precio_normal_paquete_mixto <= 0) {
         header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=Los precios deben ser mayores a 0');
         exit();
     }
@@ -65,22 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_normal);
     $stmt->execute();
 
-    // Precio Jumbo Unidad
-    $tamano = 'jumbo';
-    $presentacion = 'unidad';
-    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_jumbo);
-    $stmt->execute();
-
     // Precio Normal Paquete 3
     $tamano = 'normal';
     $presentacion = 'paquete3';
     $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_normal_paquete3);
     $stmt->execute();
 
-    // Precio Jumbo Paquete 3
-    $tamano = 'jumbo';
-    $presentacion = 'paquete3';
-    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_jumbo_paquete3);
+    // Precio Normal Paquete Mixto
+    $tamano = 'normal';
+    $presentacion = 'paquete_mixto';
+    $stmt->bind_param("issd", $id, $tamano, $presentacion, $precio_normal_paquete_mixto);
     $stmt->execute();
 
     // Procesar la imagen si se subió una nueva

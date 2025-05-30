@@ -102,21 +102,16 @@ $db->desconectar();
                             <h3><?php echo htmlspecialchars_decode($producto['nombre']); ?></h3>
                             <p><?php echo htmlspecialchars_decode($producto['descripcion']); ?></p>
                             <div class="precios-container">
-                                <p class="precio">Normal: $<?= isset($precios[$producto['id']]['normal']) ? number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A' ?></p>
-                                <p class="precio">Jumbo: $<?= isset($precios[$producto['id']]['jumbo']) ? number_format($precios[$producto['id']]['jumbo'], 0, ',', '.') : 'N/A' ?></p>
+                                <p class="precio">Normal: <span id="precio-<?= $producto['id'] ?>">$<?= isset($precios[$producto['id']]['normal']) ? number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A' ?></span></p>
                             </div>
                             <?php if (isset($_SESSION['usuario_id'])): ?>
                                 <form class="add-cart-form" action="../controllers/carrito.php" method="POST" style="margin-top: 1rem;">
                                     <input type="hidden" name="producto_id" value="<?php echo $producto['id']; ?>">
-                                    <label style="font-size:0.95rem;">Tamaño:</label>
-                                    <select name="tamano" style="margin:0 0.5rem 0 0.5rem;" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
-                                        <option value="normal">Normal</option>
-                                        <option value="jumbo">Jumbo</option>
-                                    </select>
                                     <label style="font-size:0.95rem;">Presentación:</label>
                                     <select name="presentacion" style="margin:0 0.5rem 0 0.5rem;" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
                                         <option value="unidad">Unidad</option>
                                         <option value="paquete3">Paquete de 3</option>
+                                        <option value="paquete_mixto">Paquete Mixto</option>
                                     </select>
                                     <input type="number" name="cantidad" value="1" min="1" style="width: 60px; margin-right: 0.5rem;">
                                     <button type="submit">Agregar al Carrito</button>
@@ -154,8 +149,8 @@ $db->desconectar();
     </section>
     <footer class="footer">
         <div class="social-icons">
-            <a href="https://www.instagram.com/samuel.7sxx/"><img src="../assets/img/instagram.png" alt="Instagram"></a>
-            <a href="#"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/instagram.png" alt="Instagram"></a>
+            <a href="https://wa.me/573173953818"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
         <p>© 2025 Galería de Galletas. Todos los derechos reservados.</p>
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
@@ -215,8 +210,8 @@ if (document.querySelectorAll('.add-cart-form').length) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     Swal.fire({
-                        icon: 'error',
-                        title: '¡Stock insuficiente!',
+                        icon: data.limit_exceeded ? 'warning' : 'error',
+                        title: data.limit_exceeded ? 'Límite de galletas excedido' : '¡Error!',
                         text: data.error || 'No hay suficiente stock disponible para este producto.',
                         confirmButtonColor: '#a14a7f'
                     });
@@ -234,9 +229,8 @@ if (document.querySelectorAll('.add-cart-form').length) {
     });
 }
 function actualizarPrecio(productoId) {
-    const tamano = document.querySelector(`select[name=\"tamano\"][onchange=\"actualizarPrecio(${productoId})\"]`).value;
-    const presentacion = document.querySelector(`select[name=\"presentacion\"][onchange=\"actualizarPrecio(${productoId})\"]`).value;
-    fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=${tamano}&presentacion=${presentacion}`)
+    const presentacion = document.querySelector(`.product-card input[name='producto_id'][value='${productoId}']`).closest('.product-card').querySelector("select[name='presentacion']").value;
+    fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=normal&presentacion=${presentacion}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

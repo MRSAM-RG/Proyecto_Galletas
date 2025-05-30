@@ -17,7 +17,7 @@ $producto_id = filter_input(INPUT_GET, 'producto_id', FILTER_VALIDATE_INT);
 $tamano = filter_input(INPUT_GET, 'tamano', FILTER_SANITIZE_STRING);
 $presentacion = filter_input(INPUT_GET, 'presentacion', FILTER_SANITIZE_STRING);
 
-if (!$producto_id || !in_array($tamano, ['normal', 'jumbo']) || !in_array($presentacion, ['unidad', 'paquete3'])) {
+if (!$producto_id || $tamano !== 'normal' || !in_array($presentacion, ['unidad', 'paquete3', 'paquete_mixto'])) {
     echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
     exit();
 }

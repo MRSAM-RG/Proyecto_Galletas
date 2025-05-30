@@ -6,7 +6,7 @@ class MySQL {
     private $host = 'localhost';
     private $usuario = 'root';
     private $clave = '';
-    private $db = 'galletas_db';
+    private $db = 'bd_galletas';
 
     public function conectar() {
         $this->conexion = new mysqli($this->host, $this->usuario, $this->clave, $this->db);
@@ -66,8 +66,8 @@ class MySQL {
         $sql_precios = "CREATE TABLE IF NOT EXISTS precios_productos (
             id INT AUTO_INCREMENT PRIMARY KEY,
             producto_id INT NOT NULL,
-            tamano ENUM('normal', 'jumbo') NOT NULL,
-            presentacion ENUM('unidad', 'paquete3') NOT NULL,
+            tamano ENUM('normal') NOT NULL,
+            presentacion ENUM('unidad', 'paquete3', 'paquete_mixto') NOT NULL,
             precio DECIMAL(10,2) NOT NULL,
             FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
             UNIQUE KEY unique_precio (producto_id, tamano, presentacion)

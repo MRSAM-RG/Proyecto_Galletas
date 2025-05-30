@@ -55,16 +55,12 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
                         <input type="number" name="precio_normal" step="0.01" min="0" required placeholder="Ej: 25000">
                     </div>
                     <div class="precio-item">
-                        <label>Precio Jumbo:</label>
-                        <input type="number" name="precio_jumbo" step="0.01" min="0" required placeholder="Ej: 35000">
-                    </div>
-                    <div class="precio-item">
                         <label>Precio Paquete 3 Normal:</label>
                         <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required placeholder="Ej: 70000">
                     </div>
                     <div class="precio-item">
-                        <label>Precio Paquete 3 Jumbo:</label>
-                        <input type="number" name="precio_jumbo_paquete3" step="0.01" min="0" required placeholder="Ej: 100000">
+                        <label>Precio Paquete Mixto Normal:</label>
+                        <input type="number" name="precio_normal_paquete_mixto" step="0.01" min="0" required placeholder="Ej: 75000">
                     </div>
                 </div>
             </div>

@@ -111,9 +111,8 @@ $db->desconectar();
                     <th>Nombre</th>
                     <th>Descripción</th>
                     <th>Precio Normal</th>
-                    <th>Precio Jumbo</th>
                     <th>Precio Paq. 3 Normal</th>
-                    <th>Precio Paq. 3 Jumbo</th>
+                    <th>Precio Paq. Mixto Normal</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -125,9 +124,8 @@ $db->desconectar();
                         <td><?php echo htmlspecialchars_decode($producto['nombre']); ?></td>
                         <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
                         <td>$<?= isset($precios[$producto['id']]['normal']['unidad']) ? number_format($precios[$producto['id']]['normal']['unidad'], 0, ',', '.') : 'N/A' ?></td>
-                        <td>$<?= isset($precios[$producto['id']]['jumbo']['unidad']) ? number_format($precios[$producto['id']]['jumbo']['unidad'], 0, ',', '.') : 'N/A' ?></td>
                         <td>$<?= isset($precios[$producto['id']]['normal']['paquete3']) ? number_format($precios[$producto['id']]['normal']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
-                        <td>$<?= isset($precios[$producto['id']]['jumbo']['paquete3']) ? number_format($precios[$producto['id']]['jumbo']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
+                        <td>$<?= isset($precios[$producto['id']]['normal']['paquete_mixto']) ? number_format($precios[$producto['id']]['normal']['paquete_mixto'], 0, ',', '.') : 'N/A' ?></td>
                         <td>
                             <div class="acciones-flex">
                                 <button onclick="window.location.href='editarProducto.php?id=<?php echo $producto['id']; ?>'" class="btn-editar">Editar</button>
