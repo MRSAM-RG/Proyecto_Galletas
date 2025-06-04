@@ -19,11 +19,11 @@ $queryManager = new QueryManager($db);
 
 $id = $_GET['id'];
 
-if ($queryManager->deleteProduct($id)) {
-    header('Location: ../views/admin/productos.php?success=Producto desactivado correctamente');
+if ($queryManager->reactivateProduct($id)) {
+    header('Location: ../views/admin/productos.php?success=Producto reactivado correctamente');
 } else {
-    header('Location: ../views/admin/productos.php?error=Error al desactivar el producto');
+    header('Location: ../views/admin/productos.php?error=Error al reactivar el producto');
 }
 
 $db->desconectar();
-?>
+?> 

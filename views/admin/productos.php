@@ -12,7 +12,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
 $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
-$productos = $queryManager->getAllProducts(false);
+$productos = $queryManager->getAllProductsIncludingInactive();
 
 // Obtener precios para todos los productos
 $precios = [];
@@ -74,6 +74,31 @@ $db->desconectar();
         }
         .btn-editar, .btn-eliminar { width: 100%; margin-bottom: 0; }
     }
+    .estado-badge {
+        padding: 0.3em 0.6em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+    .estado-badge.activo {
+        background-color: #28a745;
+        color: white;
+    }
+    .estado-badge.inactivo {
+        background-color: #dc3545;
+        color: white;
+    }
+    .btn-reactivar {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-reactivar:hover {
+        background-color: #218838;
+    }
     </style>
 </head>
 <body>
@@ -113,6 +138,7 @@ $db->desconectar();
                     <th>Precio Normal</th>
                     <th>Precio Paq. 3 Normal</th>
                     <th>Precio Paq. Mixto Normal</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -127,9 +153,18 @@ $db->desconectar();
                         <td>$<?= isset($precios[$producto['id']]['normal']['paquete3']) ? number_format($precios[$producto['id']]['normal']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
                         <td>$<?= isset($precios[$producto['id']]['normal']['paquete_mixto']) ? number_format($precios[$producto['id']]['normal']['paquete_mixto'], 0, ',', '.') : 'N/A' ?></td>
                         <td>
+                            <span class="estado-badge <?php echo $producto['estado'] === 'activo' ? 'activo' : 'inactivo'; ?>">
+                                <?php echo ucfirst($producto['estado']); ?>
+                            </span>
+                        </td>
+                        <td>
                             <div class="acciones-flex">
                                 <button onclick="window.location.href='editarProducto.php?id=<?php echo $producto['id']; ?>'" class="btn-editar">Editar</button>
-                                <button onclick="confirmarEliminacion(<?php echo $producto['id']; ?>)" class="btn-eliminar">Eliminar</button>
+                                <?php if ($producto['estado'] === 'activo'): ?>
+                                    <button onclick="confirmarEliminacion(<?php echo $producto['id']; ?>)" class="btn-eliminar">Desactivar</button>
+                                <?php else: ?>
+                                    <button onclick="confirmarReactivacion(<?php echo $producto['id']; ?>)" class="btn-reactivar">Reactivar</button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -142,16 +177,33 @@ $db->desconectar();
     function confirmarEliminacion(id) {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción no se puede deshacer',
+            text: 'El producto se marcará como inactivo',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, desactivar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = `../../controllers/eliminarProducto.php?id=${id}`;
+            }
+        });
+    }
+
+    function confirmarReactivacion(id) {
+        Swal.fire({
+            title: '¿Reactivar producto?',
+            text: 'El producto volverá a estar disponible',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, reactivar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `../../controllers/reactivarProducto.php?id=${id}`;
             }
         });
     }

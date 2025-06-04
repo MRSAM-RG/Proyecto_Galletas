@@ -178,7 +178,19 @@ $db->desconectar();
                                         <td><?php echo htmlspecialchars_decode($item['nombre']); ?></td>
                                         <td><img src="../assets/img/<?php echo htmlspecialchars($item['imagen']); ?>" alt="<?php echo htmlspecialchars($item['nombre']); ?>"></td>
                                         <td><?php echo ucfirst($item['tamano']); ?></td>
-                                        <td><?php echo $item['presentacion'] === 'unidad' ? 'Unidad' : 'Paquete de 3'; ?></td>
+                                        <td>
+                                            <?php
+                                            if ($item['presentacion'] === 'unidad') {
+                                                echo 'Unidad';
+                                            } elseif ($item['presentacion'] === 'paquete3') {
+                                                echo 'Paquete de 3';
+                                            } elseif ($item['presentacion'] === 'paquete_mixto') {
+                                                echo 'Paquete Mixto';
+                                            } else {
+                                                echo htmlspecialchars($item['presentacion']);
+                                            }
+                                            ?>
+                                        </td>
                                         <td><?php echo $item['cantidad']; ?></td>
                                         <td class="precio"><?= '$' . number_format($item['precio'], 0, ',', '.') ?></td>
                                         <td class="precio"><?= '$' . number_format($item['precio'] * $item['cantidad'], 0, ',', '.') ?></td>

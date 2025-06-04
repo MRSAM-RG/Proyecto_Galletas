@@ -31,7 +31,7 @@ class QueryManager {
 
     // ====== PRODUCTOS ======
     public function getAllProducts() {
-        $stmt = $this->db->conexion->prepare("SELECT * FROM productos ORDER BY id DESC");
+        $stmt = $this->db->conexion->prepare("SELECT * FROM productos WHERE estado = 'activo' ORDER BY id DESC");
         $stmt->execute();
         return $stmt->get_result();
     }
@@ -44,7 +44,7 @@ class QueryManager {
     }
 
     public function createProduct($nombre, $descripcion, $precio, $imagen) {
-        $stmt = $this->db->conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?)");
+        $stmt = $this->db->conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, imagen, estado) VALUES (?, ?, ?, ?, 'activo')");
         $stmt->bind_param("ssds", $nombre, $descripcion, $precio, $imagen);
         return $stmt->execute();
     }
@@ -61,20 +61,24 @@ class QueryManager {
     }
 
     public function deleteProduct($id) {
-        // Eliminar primero del carrito
-        $stmt1 = $this->db->conexion->prepare("DELETE FROM carrito WHERE producto_id = ?");
-        $stmt1->bind_param("i", $id);
-        $stmt1->execute();
+        // En lugar de eliminar, actualizamos el estado a inactivo
+        $stmt = $this->db->conexion->prepare("UPDATE productos SET estado = 'inactivo' WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
 
-        // Eliminar de detalle_pedido
-        $stmt2 = $this->db->conexion->prepare("DELETE FROM detalle_pedido WHERE producto_id = ?");
-        $stmt2->bind_param("i", $id);
-        $stmt2->execute();
+    public function reactivateProduct($id) {
+        // Método para reactivar un producto
+        $stmt = $this->db->conexion->prepare("UPDATE productos SET estado = 'activo' WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
 
-        // Ahora sí eliminar el producto
-        $stmt3 = $this->db->conexion->prepare("DELETE FROM productos WHERE id = ?");
-        $stmt3->bind_param("i", $id);
-        return $stmt3->execute();
+    public function getAllProductsIncludingInactive() {
+        // Método para obtener todos los productos, incluyendo los inactivos
+        $stmt = $this->db->conexion->prepare("SELECT * FROM productos ORDER BY id DESC");
+        $stmt->execute();
+        return $stmt->get_result();
     }
 
     // ====== CARRITO ======
