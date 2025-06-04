@@ -15,11 +15,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitización de datos
     $nombre = filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING);
     $descripcion = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_STRING);
-    $precio = filter_input(INPUT_POST, 'precio', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
     // Validación de campos vacíos
-    if (empty($nombre) || empty($descripcion) || empty($precio)) {
+    if (empty($nombre) || empty($descripcion)) {
         header('Location: ../views/admin/admin.php?error=Todos los campos son obligatorios');
+        exit();
+    }
+
+    // Validación de precios
+    $precio_normal_unidad = filter_input(INPUT_POST, 'precio_normal_unidad', FILTER_VALIDATE_FLOAT);
+    $precio_normal_paquete3 = filter_input(INPUT_POST, 'precio_normal_paquete3', FILTER_VALIDATE_FLOAT);
+    $precio_jumbo_unidad = filter_input(INPUT_POST, 'precio_jumbo_unidad', FILTER_VALIDATE_FLOAT);
+    $precio_jumbo_paquete3 = filter_input(INPUT_POST, 'precio_jumbo_paquete3', FILTER_VALIDATE_FLOAT);
+
+    if ($precio_normal_unidad === false || $precio_normal_paquete3 === false || 
+        $precio_jumbo_unidad === false || $precio_jumbo_paquete3 === false) {
+        header('Location: ../views/admin/admin.php?error=Los precios deben ser números válidos');
+        exit();
+    }
+
+    if ($precio_normal_unidad <= 0 || $precio_normal_paquete3 <= 0 || 
+        $precio_jumbo_unidad <= 0 || $precio_jumbo_paquete3 <= 0) {
+        header('Location: ../views/admin/admin.php?error=Los precios deben ser mayores a 0');
         exit();
     }
 
@@ -40,12 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (strlen($descripcion) > 500) {
         header('Location: ../views/admin/admin.php?error=La descripción no puede exceder los 500 caracteres');
-        exit();
-    }
-
-    // Validación del precio
-    if ($precio <= 0) {
-        header('Location: ../views/admin/admin.php?error=El precio debe ser mayor a 0');
         exit();
     }
 
@@ -86,8 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descripcion = htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8');
 
     // Usar consultas preparadas para prevenir SQL injection
-    $stmt = $db->conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssds", $nombre, $descripcion, $precio, $nombreImagen);
+    $stmt = $db->conexion->prepare("INSERT INTO productos (nombre, descripcion, imagen) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $nombre, $descripcion, $nombreImagen);
     
     if ($stmt->execute()) {
         // Obtener el ID del producto recién insertado
@@ -95,29 +106,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Insertar los precios específicos
         $precios = [
-            ['normal', 'unidad', $_POST['precio_normal_unidad']],
-            ['normal', 'paquete3', $_POST['precio_normal_paquete3']],
-            ['jumbo', 'unidad', $_POST['precio_jumbo_unidad']],
-            ['jumbo', 'paquete3', $_POST['precio_jumbo_paquete3']]
+            ['normal', 'unidad', $precio_normal_unidad],
+            ['normal', 'paquete3', $precio_normal_paquete3],
+            ['jumbo', 'unidad', $precio_jumbo_unidad],
+            ['jumbo', 'paquete3', $precio_jumbo_paquete3]
         ];
         
         $stmt_precios = $db->conexion->prepare("INSERT INTO precios_productos (producto_id, tamano, presentacion, precio) VALUES (?, ?, ?, ?)");
         
         foreach ($precios as $precio) {
-            $stmt_precios->bind_param('issd', $producto_id, $precio[0], $precio[1], $precio[2]);
-            $stmt_precios->execute();
+            $tamano = $precio[0];
+            $presentacion = $precio[1];
+            $valor = $precio[2];
+            $stmt_precios->bind_param('issd', $producto_id, $tamano, $presentacion, $valor);
+            if (!$stmt_precios->execute()) {
+                // Si hay error al insertar precios, eliminar el producto y la imagen
+                $stmt_delete = $db->conexion->prepare("DELETE FROM productos WHERE id = ?");
+                $stmt_delete->bind_param('i', $producto_id);
+                $stmt_delete->execute();
+                unlink($rutaDestino);
+                header('Location: ../views/admin/admin.php?error=Error al agregar los precios del producto');
+                exit();
+            }
         }
 
         // Insertar el stock
         $stmt_stock = $db->conexion->prepare("INSERT INTO stock_productos (producto_id, tamano, stock) VALUES (?, ?, ?)");
         
         // Insertar stock normal
-        $stmt_stock->bind_param('isi', $producto_id, 'normal', $stock_normal);
-        $stmt_stock->execute();
+        $tamano_stock = 'normal';
+        $stmt_stock->bind_param('isi', $producto_id, $tamano_stock, $stock_normal);
+        if (!$stmt_stock->execute()) {
+            // Si hay error al insertar stock, eliminar el producto, precios e imagen
+            $stmt_delete = $db->conexion->prepare("DELETE FROM productos WHERE id = ?");
+            $stmt_delete->bind_param('i', $producto_id);
+            $stmt_delete->execute();
+            $stmt_delete_precios = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
+            $stmt_delete_precios->bind_param('i', $producto_id);
+            $stmt_delete_precios->execute();
+            unlink($rutaDestino);
+            header('Location: ../views/admin/admin.php?error=Error al agregar el stock del producto');
+            exit();
+        }
         
         // Insertar stock jumbo
-        $stmt_stock->bind_param('isi', $producto_id, 'jumbo', $stock_jumbo);
-        $stmt_stock->execute();
+        $tamano_stock = 'jumbo';
+        $stmt_stock->bind_param('isi', $producto_id, $tamano_stock, $stock_jumbo);
+        if (!$stmt_stock->execute()) {
+            // Si hay error al insertar stock jumbo, eliminar el producto, precios e imagen
+            $stmt_delete = $db->conexion->prepare("DELETE FROM productos WHERE id = ?");
+            $stmt_delete->bind_param('i', $producto_id);
+            $stmt_delete->execute();
+            $stmt_delete_precios = $db->conexion->prepare("DELETE FROM precios_productos WHERE producto_id = ?");
+            $stmt_delete_precios->bind_param('i', $producto_id);
+            $stmt_delete_precios->execute();
+            unlink($rutaDestino);
+            header('Location: ../views/admin/admin.php?error=Error al agregar el stock del producto');
+            exit();
+        }
         
         header('Location: ../views/admin/admin.php?success=Producto agregado correctamente');
     } else {

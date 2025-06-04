@@ -38,6 +38,7 @@ $db->desconectar();
     <title>Galería de Galletas</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -154,9 +155,8 @@ $db->desconectar();
     </section>
     <footer class="footer">
         <div class="social-icons">
-            <a href="#"><img src="../assets/img/instagram.png" alt="Instagram"></a>
-            <a href="#"><img src="../assets/img/facebook.png" alt="Facebook"></a>
-            <a href="#"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/instagram.png" alt="Instagram"></a>
+            <a href="https://wa.me/573173953818"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
         <p>© 2025 Galería de Galletas. Todos los derechos reservados.</p>
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
@@ -252,15 +252,22 @@ window.addEventListener('DOMContentLoaded', function() {
         actualizarPrecio(id);
     });
 });
-</script>
-<?php if (isset($_GET['stock_error'])): ?>
-<script>
+// Mostrar notificaciones con SweetAlert2
+<?php if (isset($_GET['success'])): ?>
+Swal.fire({
+    icon: 'success',
+    title: '¡Éxito!','text': '<?= htmlspecialchars($_GET['success']) ?>',
+    confirmButtonColor: '#a14a7f',
+    allowOutsideClick: false
+});
+<?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
 Swal.fire({
     icon: 'error',
-    title: '¡Stock insuficiente!',
-    text: 'No hay suficiente stock disponible para este producto.',
-    confirmButtonColor: '#a14a7f'
+    title: '¡Error!','text': '<?= htmlspecialchars($_GET['error']) ?>',
+    confirmButtonColor: '#a14a7f',
+    allowOutsideClick: false
 });
-</script>
 <?php endif; ?>
+</script>
 </html>

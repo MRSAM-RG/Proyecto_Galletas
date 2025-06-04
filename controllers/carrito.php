@@ -57,6 +57,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $factor = ($presentacion === 'paquete3') ? 3 : 1;
     $cantidad_real = $cantidad * $factor;
 
+    // Verificar stock suficiente
+    if ($cantidad_real > $stock_disponible) {
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'No hay suficiente stock disponible']);
+            exit();
+        } else {
+            header('Location: ../views/index.php?stock_error=1');
+            exit();
+        }
+    }
+
     // Obtener todos los ítems del carrito para ese producto y tamaño
     $usuario_id = $_SESSION['usuario_id'];
     $result_items = $db->conexion->prepare("SELECT cantidad, presentacion FROM carrito WHERE usuario_id = ? AND producto_id = ? AND tamano = ?");
@@ -70,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $total_unidades_despues = $total_unidades_en_carrito + $cantidad_real;
 
-    // Validar stock suficiente
+    // Validar stock suficiente considerando el carrito actual
     if ($total_unidades_despues > $stock_disponible) {
         if ($isAjax) {
             header('Content-Type: application/json');

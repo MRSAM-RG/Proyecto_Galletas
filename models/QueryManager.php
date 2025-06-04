@@ -30,8 +30,12 @@ class QueryManager {
     }
 
     // ====== PRODUCTOS ======
-    public function getAllProducts() {
-        $stmt = $this->db->conexion->prepare("SELECT * FROM productos ORDER BY id DESC");
+    public function getAllProducts($todos = false) {
+        if ($todos) {
+            $stmt = $this->db->conexion->prepare("SELECT * FROM productos ORDER BY id DESC");
+        } else {
+            $stmt = $this->db->conexion->prepare("SELECT * FROM productos WHERE estado = 1 ORDER BY id DESC");
+        }
         $stmt->execute();
         return $stmt->get_result();
     }

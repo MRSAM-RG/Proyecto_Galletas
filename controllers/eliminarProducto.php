@@ -18,10 +18,12 @@ $db->conectar();
 $queryManager = new QueryManager($db);
 
 $id = intval($_GET['id']);
-if ($queryManager->deleteProduct($id)) {
-    header('Location: ../views/admin/admin.php?success=Producto eliminado correctamente');
+$stmt = $db->conexion->prepare("UPDATE productos SET estado = 0 WHERE id = ?");
+$stmt->bind_param("i", $id);
+if ($stmt->execute()) {
+    header('Location: ../views/admin/admin.php?success=Producto desactivado correctamente');
 } else {
-    header('Location: ../views/admin/admin.php?error=Error al eliminar el producto');
+    header('Location: ../views/admin/admin.php?error=Error al desactivar el producto');
 }
 
 $db->desconectar();

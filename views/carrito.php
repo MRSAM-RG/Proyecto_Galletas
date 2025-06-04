@@ -327,18 +327,24 @@ $db->desconectar();
     window.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') document.getElementById('direccionModal').style.display = 'none';
     });
-    </script>
+
+    // Mostrar notificaciones con SweetAlert2
     <?php if (isset($_GET['success'])): ?>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: '¡Pedido Confirmado!',
-            text: 'Tu pedido ha sido procesado correctamente.',
-            confirmButtonColor: '#a14a7f'
-        });
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!','text': '<?= htmlspecialchars($_GET['success']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
     });
-    </script>
     <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        icon: 'error',
+        title: '¡Error!','text': '<?= htmlspecialchars($_GET['error']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
+    });
+    <?php endif; ?>
+    </script>
 </body>
 </html>

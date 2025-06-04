@@ -103,28 +103,56 @@ if (!$producto) {
                 </div>
             </div>
 
+            <h3 style="color:#a14a7f;">Estado del Producto</h3>
+            <div class="form-group">
+                <label for="estado">Estado:</label>
+                <select name="estado" id="estado">
+                    <option value="1" <?= $producto['estado'] == 1 ? 'selected' : '' ?>>Activo</option>
+                    <option value="0" <?= $producto['estado'] == 0 ? 'selected' : '' ?>>Inactivo</option>
+                </select>
+            </div>
+
             <label>Imagen (dejar vacío para mantener actual):</label><br>
             <input type="file" name="imagen" accept="image/*"><br><br>
 
             <button type="submit" class="btn">Guardar Cambios</button>
         </form>
     </div>
-</body>
-<script>
-document.getElementById('hamburger-btn').addEventListener('click', function() {
-    document.querySelector('.nav-links').classList.toggle('open');
-});
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+    document.getElementById('hamburger-btn').addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('open');
+    });
 
-// Actualiza el contador del carrito
-function updateCartCount() {
-    var cartCount = document.getElementById('cart-count');
-    if (!cartCount) return;
-    fetch('../carrito.php?count=1')
-        .then(res => res.json())
-        .then(data => {
-            cartCount.textContent = data.count > 0 ? '(' + data.count + ')' : '';
-        });
-}
-updateCartCount();
-</script>
+    // Actualiza el contador del carrito
+    function updateCartCount() {
+        var cartCount = document.getElementById('cart-count');
+        if (!cartCount) return;
+        fetch('../carrito.php?count=1')
+            .then(res => res.json())
+            .then(data => {
+                cartCount.textContent = data.count > 0 ? '(' + data.count + ')' : '';
+            });
+    }
+    updateCartCount();
+
+    // Mostrar notificaciones con SweetAlert2
+    <?php if (isset($_GET['success'])): ?>
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!','text': '<?= htmlspecialchars($_GET['success']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
+    });
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        icon: 'error',
+        title: '¡Error!','text': '<?= htmlspecialchars($_GET['error']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
+    });
+    <?php endif; ?>
+    </script>
+</body>
 </html>

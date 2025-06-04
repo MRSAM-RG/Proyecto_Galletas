@@ -12,7 +12,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
 $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
-$productos = $queryManager->getAllProducts(false);
+$productos = $queryManager->getAllProducts(true);
 // Obtener stock de todos los productos
 $stocks = [];
 $result_stock = $db->conexion->query("SELECT producto_id, tamano, stock FROM stock_productos");
@@ -69,6 +69,7 @@ $db->desconectar();
                         <th>Precio Jumbo (Unidad)</th>
                         <th>Stock Normal</th>
                         <th>Stock Jumbo</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -88,6 +89,7 @@ $db->desconectar();
                         <td><?= $precio_jumbo_unidad ?></td>
                         <td><?= $stock_normal ?></td>
                         <td><?= $stock_jumbo ?></td>
+                        <td><?= $producto['estado'] == 1 ? '<span style="color:green;font-weight:bold;">Activo</span>' : '<span style="color:red;font-weight:bold;">Inactivo</span>' ?></td>
                         <td>
                             <a href="editarProducto.php?id=<?php echo $producto['id']; ?>">Editar</a> |
                             <a href="../../controllers/eliminarProducto.php?id=<?php echo $producto['id']; ?>" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
@@ -99,6 +101,7 @@ $db->desconectar();
 
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 <script>
 document.getElementById('hamburger-btn').addEventListener('click', function() {
     document.querySelector('.nav-links').classList.toggle('open');
@@ -115,5 +118,25 @@ function updateCartCount() {
         });
 }
 updateCartCount();
+
+// Mostrar notificaciones con SweetAlert2
+<?php if (isset($_GET['success'])): ?>
+Swal.fire({
+    icon: 'success',
+    title: '¡Éxito!',
+    text: '<?= htmlspecialchars($_GET['success']) ?>',
+    confirmButtonColor: '#a14a7f',
+    allowOutsideClick: false
+});
+<?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
+Swal.fire({
+    icon: 'error',
+    title: '¡Error!',
+    text: '<?= htmlspecialchars($_GET['error']) ?>',
+    confirmButtonColor: '#a14a7f',
+    allowOutsideClick: false
+});
+<?php endif; ?>
 </script>
 </html> 

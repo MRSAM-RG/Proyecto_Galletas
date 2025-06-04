@@ -93,6 +93,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
             <button type="submit" class="btn btn-agregar" style="width:100%;margin-top:18px;">Agregar Producto</button>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
     function previewImg(e) {
         var file = e.target.files[0];
@@ -124,6 +125,25 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
             });
     }
     updateCartCount();
+    </script>
+    <script>
+    // Mostrar notificaciones con SweetAlert2
+    <?php if (isset($_GET['success'])): ?>
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!','text': '<?= htmlspecialchars($_GET['success']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
+    });
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+    Swal.fire({
+        icon: 'error',
+        title: '¡Error!','text': '<?= htmlspecialchars($_GET['error']) ?>',
+        confirmButtonColor: '#a14a7f',
+        allowOutsideClick: false
+    });
+    <?php endif; ?>
     </script>
 </body>
 </html> 
