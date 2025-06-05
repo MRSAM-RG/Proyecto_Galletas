@@ -50,9 +50,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
     <br><br>
     <footer class="footer">
         <div class="social-icons">
-            <a href="#"><img src="../../assets/img/instagram.png" alt="Instagram"></a>
-            <a href="#"><img src="../../assets/img/facebook.png" alt="Facebook"></a>
-            <a href="#"><img src="../../assets/img/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../../assets/img/instagram.png" alt="Instagram"></a>
+            <a href="https://wa.me/573173953818"><img src="../../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
         <p>© 2025 Galería de Galletas. Todos los derechos reservados.</p>
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
