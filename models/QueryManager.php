@@ -231,34 +231,36 @@ class QueryManager {
         return $stmt->execute();
     }
 
-    public function getAllOrders($estado = null) {
+    public function getAllOrders($estado = null, $limit = null, $offset = null) {
+        $sql = "SELECT p.*, COALESCE(u.nombre, 'Usuario Eliminado') AS usuario FROM pedidos p LEFT JOIN usuarios u ON p.usuario_id = u.id";
+        $params = [];
+        $types = '';
+
         if ($estado && $estado !== 'todos') {
-            $stmt = $this->db->conexion->prepare("
-                SELECT p.*, COALESCE(u.nombre, 'Usuario Eliminado') AS usuario 
-                FROM pedidos p 
-                LEFT JOIN usuarios u ON p.usuario_id = u.id 
-                WHERE p.estado = ? 
-                ORDER BY p.fecha DESC
-            ");
-            if (!$stmt) {
-                error_log('Error al preparar la consulta de pedidos filtrados: ' . $this->db->conexion->error);
-                return false;
-            }
-            
-            $stmt->bind_param("s", $estado);
-        } else {
-            $stmt = $this->db->conexion->prepare("
-                SELECT p.*, COALESCE(u.nombre, 'Usuario Eliminado') AS usuario 
-                FROM pedidos p 
-                LEFT JOIN usuarios u ON p.usuario_id = u.id 
-                ORDER BY p.fecha DESC
-            ");
-            if (!$stmt) {
-                error_log('Error al preparar la consulta de todos los pedidos: ' . $this->db->conexion->error);
-                return false;
-            }
+            $sql .= " WHERE p.estado = ?";
+            $params[] = $estado;
+            $types .= 's';
+        }
+
+        $sql .= " ORDER BY p.fecha DESC";
+
+        if ($limit !== null && $offset !== null) {
+            $sql .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+            $types .= 'ii'; // Assuming limit and offset are integers
+        }
+
+        $stmt = $this->db->conexion->prepare($sql);
+        if (!$stmt) {
+            error_log('Error al preparar la consulta de pedidos: ' . $this->db->conexion->error);
+            return false;
         }
         
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+
         if (!$stmt->execute()) {
             error_log('Error al ejecutar la consulta de pedidos: ' . $stmt->error);
             return false;
@@ -284,6 +286,36 @@ class QueryManager {
         }
         
         return $stmt->get_result();
+    }
+
+    public function getTotalOrdersCount($estado = null) {
+        $sql = "SELECT COUNT(*) as total FROM pedidos";
+        $params = [];
+        $types = '';
+
+        if ($estado && $estado !== 'todos') {
+            $sql .= " WHERE estado = ?";
+            $params[] = $estado;
+            $types .= 's';
+        }
+
+        $stmt = $this->db->conexion->prepare($sql);
+        if (!$stmt) {
+            error_log('Error al preparar la consulta de conteo de pedidos: ' . $this->db->conexion->error);
+            return false;
+        }
+
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+
+        if (!$stmt->execute()) {
+            error_log('Error al ejecutar la consulta de conteo de pedidos: ' . $stmt->error);
+            return false;
+        }
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result['total'];
     }
 
     // Obtener precios por tamaño y presentación

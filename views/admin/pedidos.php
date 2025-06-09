@@ -16,8 +16,16 @@ $db = new MySQL();
 $db->conectar();
 $queryManager = new QueryManager($db);
 
+// Paginación
+$pedidos_por_pagina = 10;
+$total_pedidos = $queryManager->getTotalOrdersCount($estado);
+$total_paginas = ceil($total_pedidos / $pedidos_por_pagina);
+$pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+$pagina_actual = max(1, min($pagina_actual, $total_paginas > 0 ? $total_paginas : 1)); // Asegura que la página actual sea válida
+$offset = ($pagina_actual - 1) * $pedidos_por_pagina;
+
 // Obtener pedidos y detalles
-$pedidos = $queryManager->getAllOrders($estado);
+$pedidos = $queryManager->getAllOrders($estado, $pedidos_por_pagina, $offset);
 if ($pedidos === false) {
     $error = "Error al obtener los pedidos. Por favor, intente nuevamente.";
 } else {
@@ -169,6 +177,143 @@ $db->desconectar();
             h1 { font-size: 1.1em; }
             .login-container { padding: 0; }
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn-pagination {
+            padding: 8px 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .btn-pagination:hover {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        .btn-pagination.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* Estilos para el modal de detalles */
+        .modal-details {
+            max-width: 800px;
+            width: 95%;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .modal-details h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-details .order-info {
+            margin-bottom: 20px;
+        }
+
+        .modal-details .order-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .modal-details .order-items {
+            margin-top: 20px;
+        }
+
+        .modal-details .order-items h3 {
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .modal-details .order-items table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .modal-details .order-items th,
+        .modal-details .order-items td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-details .order-items th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .modal-details .order-total {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .modal-details .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+        }
+
+        .modal-details .close-button:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .modal-details {
+                width: 100%;
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .modal-details .order-items table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .modal-details .order-items th,
+            .modal-details .order-items td {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            .pagination {
+                gap: 4px;
+            }
+
+            .btn-pagination {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -200,9 +345,6 @@ $db->desconectar();
         <div class="error"><?php echo htmlspecialchars($_GET['error']); ?></div>
     <?php endif; ?>
     <?php if ($pedidos && $pedidos->num_rows > 0): ?>
-        <div style="margin: 1.2em 0;">
-            <input type="text" id="filtroTabla" placeholder="Buscar en pedidos..." style="width: 100%; max-width: 350px; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-        </div>
         <div class="table-responsive">
             <table class="table table-hover table-striped">
                 <thead>
@@ -313,6 +455,42 @@ $db->desconectar();
                     ?>
                 </tbody>
             </table>
+
+            <!-- Paginación -->
+            <div class="pagination">
+                <?php if ($total_paginas > 1): ?>
+                    <?php if ($pagina_actual > 1): ?>
+                        <a href="?pagina=1<?php echo $estado !== 'todos' ? '&estado=' . $estado : ''; ?>" class="btn-pagination" title="Primera página">&laquo;&laquo;</a>
+                        <a href="?pagina=<?php echo ($pagina_actual - 1); ?><?php echo $estado !== 'todos' ? '&estado=' . $estado : ''; ?>" class="btn-pagination" title="Página anterior">&laquo;</a>
+                    <?php endif; ?>
+
+                    <?php
+                    $inicio = max(1, $pagina_actual - 2);
+                    $fin = min($total_paginas, $pagina_actual + 2);
+                    
+                    if ($inicio > 1) {
+                        echo '<span class="btn-pagination">...</span>';
+                    }
+                    
+                    for ($i = $inicio; $i <= $fin; $i++): ?>
+                        <a href="?pagina=<?php echo $i; ?><?php echo $estado !== 'todos' ? '&estado=' . $estado : ''; ?>" 
+                           class="btn-pagination <?php echo $i === $pagina_actual ? 'active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor;
+                    
+                    if ($fin < $total_paginas) {
+                        echo '<span class="btn-pagination">...</span>';
+                    }
+                    ?>
+
+                    <?php if ($pagina_actual < $total_paginas): ?>
+                        <a href="?pagina=<?php echo ($pagina_actual + 1); ?><?php echo $estado !== 'todos' ? '&estado=' . $estado : ''; ?>" class="btn-pagination" title="Página siguiente">&raquo;</a>
+                        <a href="?pagina=<?php echo $total_paginas; ?><?php echo $estado !== 'todos' ? '&estado=' . $estado : ''; ?>" class="btn-pagination" title="Última página">&raquo;&raquo;</a>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
             <!-- Aquí, fuera de la tabla, imprime todos los modales personalizados -->
             <?php echo $modals; ?>
         </div>
@@ -326,51 +504,50 @@ $db->desconectar();
     function confirmarCambioEstado(event, pedidoId) {
         event.preventDefault();
         Swal.fire({
-            title: '¿Confirmar cambio de estado?',
-            text: '¿Estás seguro de que deseas marcar este pedido como completado?',
-            icon: 'question',
+            title: '¿Estás seguro?',
+            text: "¿Deseas marcar este pedido como completado?",
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#a14a7f',
-            cancelButtonColor: '#6c757d',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
             confirmButtonText: 'Sí, completar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `../../controllers/cambiar_estado_pedido.php?id=${pedidoId}`;
+                window.location.href = '../../controllers/actualizar_estado_pedido.php?id=' + pedidoId + '&estado=completado';
             }
         });
-        return false;
     }
-    // Modal personalizado
-    function abrirModal(id) {
-        document.getElementById(id).style.display = 'block';
+
+    function abrirModal(modalId) {
+        console.log('Attempting to open modal:', modalId);
+        document.getElementById(modalId).style.display = 'block';
     }
-    function cerrarModal(id) {
-        document.getElementById(id).style.display = 'none';
+
+    function cerrarModal(modalId) {
+        console.log('Attempting to close modal:', modalId);
+        document.getElementById(modalId).style.display = 'none';
     }
-    // Cierra el modal si se hace clic fuera del contenido
-    window.onclick = function(event) {
-        document.querySelectorAll('.modal-custom').forEach(function(modal) {
-            if (event.target === modal) modal.style.display = 'none';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var detailButtons = document.querySelectorAll('.btn-ver-detalles');
+        console.log('Found detail buttons:', detailButtons.length);
+        detailButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var modalId = this.getAttribute('data-id');
+                console.log('Detail button clicked for modal:', modalId);
+                abrirModal(modalId);
+            });
         });
+    });
+
+    // Opcional: Cerrar modal haciendo clic fuera de él
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-custom')) {
+            event.target.style.display = "none";
+        }
     }
-    // Mostrar mensajes de éxito o error
-    <?php if (isset($_GET['success'])): ?>
-    Swal.fire({
-        title: '¡Éxito!',
-        text: '<?php echo htmlspecialchars($_GET['success']); ?>',
-        icon: 'success',
-        confirmButtonColor: '#a14a7f'
-    });
-    <?php endif; ?>
-    <?php if (isset($_GET['error'])): ?>
-    Swal.fire({
-        title: 'Error',
-        text: '<?php echo htmlspecialchars($_GET['error']); ?>',
-        icon: 'error',
-        confirmButtonColor: '#a14a7f'
-    });
-    <?php endif; ?>
+
     document.getElementById('hamburger-btn').addEventListener('click', function() {
         document.querySelector('.nav-links').classList.toggle('open');
     });
@@ -381,12 +558,6 @@ $db->desconectar();
             var texto = fila.textContent.toLowerCase();
             fila.style.display = texto.includes(filtro) ? '' : 'none';
         });
-    });
-    document.querySelector('.table-responsive tbody').addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-ver-detalles')) {
-            var id = e.target.getAttribute('data-id');
-            abrirModal(id);
-        }
     });
 </script>
 </body>
