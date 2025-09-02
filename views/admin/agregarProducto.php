@@ -20,8 +20,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
 <body>
 <nav class="navbar">
         <div class="logo">
-            <img src="../../assets/img/logo.png" alt="Logo Empresa">
-            <a href="../index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
+            <img src="../../assets/img/Logo.png" alt="Logo Empresa">
+            <a href="../index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span></a>
         </div>
         <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
             <span></span>

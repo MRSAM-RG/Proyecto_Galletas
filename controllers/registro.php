@@ -80,4 +80,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
-// Si es GET, solo mostrar el formulario (no redirigir)
+// marianagonzalezochoa8@gmail.com
+// admin12345

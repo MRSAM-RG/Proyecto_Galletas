@@ -35,15 +35,15 @@ $db->desconectar();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galería de Galletas</title>
+    <title>Dulce Tentación</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="../assets/img/logo.png" alt="Logo Empresa">
-            <a href="index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Galería de Galletas</span></a>
+            <img src="../assets/img/Logo.png" alt="Logo Empresa">
+            <a href="index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span></a>
         </div>
         <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
             <span></span>
@@ -152,7 +152,7 @@ $db->desconectar();
             <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/instagram.png" alt="Instagram"></a>
             <a href="https://wa.me/573173953818"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
-        <p>© 2025 Galería de Galletas. Todos los derechos reservados.</p>
+        <p>© 2025 Dulce Tentación. Todos los derechos reservados.</p>
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
     </footer>
     <div id="toast" class="toast" style="display:none;position:fixed;top:90px;right:30px;z-index:9999;background:#a14a7f;color:#fff;padding:16px 28px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);font-size:1.1rem;">Producto agregado al carrito</div>
