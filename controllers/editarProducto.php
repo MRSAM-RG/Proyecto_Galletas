@@ -31,10 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar que los precios existan y sean números válidos
     $precio_normal = isset($_POST['precio_normal']) ? floatval($_POST['precio_normal']) : 0;
     $precio_normal_paquete3 = isset($_POST['precio_normal_paquete3']) ? floatval($_POST['precio_normal_paquete3']) : 0;
-    $precio_normal_paquete_mixto = isset($_POST['precio_normal_paquete_mixto']) ? floatval($_POST['precio_normal_paquete_mixto']) : 0;
+    
+    // Usar un precio fijo para el paquete mixto (se puede editar desde gestión de productos)
+    $precio_normal_paquete_mixto = 75000;
 
     // Validar que los precios sean mayores a 0
-    if ($precio_normal <= 0 || $precio_normal_paquete3 <= 0 || $precio_normal_paquete_mixto <= 0) {
+    if ($precio_normal <= 0 || $precio_normal_paquete3 <= 0) {
         header('Location: ../views/admin/editarProducto.php?id=' . $id . '&error=Los precios deben ser mayores a 0');
         exit();
     }

@@ -12,6 +12,11 @@ body {
     line-height: 1.6;
 }
 
+.hero-content h1,
+.hero-content p {
+    color: #222; /* negro grisáceo */
+}
+
 /* Paleta Dulce Tentación */
 :root {
   --rosa-logo: #ff92b2;

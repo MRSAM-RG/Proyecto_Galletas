@@ -329,7 +329,7 @@ $db->desconectar();
     </button>
     <ul class="nav-links">
         <li><a href="admin.php">Admin</a></li>
-        <li><a href="../carrito.php">Carrito</a></li>
+        <li><a href="../carrito.php"><img src="../assets/img/carrito.png" alt="Carrito"></a></li>
         <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
     </ul>
 </nav>

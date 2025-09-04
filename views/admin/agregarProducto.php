@@ -30,7 +30,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
         </button>
         <ul class="nav-links">
             <li><a href="admin.php">Admin</a></li>
-            <li><a href="../carrito.php">Carrito <span id="cart-count" class="cart-count"></span></a></li>
+            <li><a href="../carrito.php"><img src="../assets/img/carrito.png" alt="Carrito"> <span id="cart-count" class="cart-count"></span></a></li>
             <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
         </ul>
     </nav>
@@ -57,10 +57,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
                     <div class="precio-item">
                         <label>Precio Paquete 3 Normal:</label>
                         <input type="number" name="precio_normal_paquete3" step="0.01" min="0" required placeholder="Ej: 70000">
-                    </div>
-                    <div class="precio-item">
-                        <label>Precio Paquete Mixto Normal:</label>
-                        <input type="number" name="precio_normal_paquete_mixto" step="0.01" min="0" required placeholder="Ej: 75000">
                     </div>
                 </div>
             </div>

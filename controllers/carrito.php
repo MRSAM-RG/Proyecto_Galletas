@@ -39,18 +39,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Obtener el precio específico según tamaño y presentación
-    $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
-    $stmt_precio->bind_param('iss', $producto_id, $tamano, $presentacion);
-    $stmt_precio->execute();
-    $result_precio = $stmt_precio->get_result();
-    $precio_row = $result_precio->fetch_assoc();
-    
-    if (!$precio_row) {
-        header('Location: ../views/index.php?error=Precio no disponible para esta combinación');
-        exit();
+    if ($presentacion === 'paquete_mixto') {
+        // Obtener el precio global del paquete mixto
+        $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE presentacion = 'paquete_mixto' LIMIT 1");
+        $stmt_precio->execute();
+        $result_precio = $stmt_precio->get_result();
+        $precio_row = $result_precio->fetch_assoc();
+        
+        if (!$precio_row) {
+            // Si no hay precio de paquete mixto, usar el valor por defecto
+            $precio = 75000;
+        } else {
+            $precio = $precio_row['precio'];
+        }
+    } else {
+        // Para unidad y paquete3, usar el precio específico del producto
+        $stmt_precio = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
+        $stmt_precio->bind_param('iss', $producto_id, $tamano, $presentacion);
+        $stmt_precio->execute();
+        $result_precio = $stmt_precio->get_result();
+        $precio_row = $result_precio->fetch_assoc();
+        
+        if (!$precio_row) {
+            header('Location: ../views/index.php?error=Precio no disponible para esta combinación');
+            exit();
+        }
+        
+        $precio = $precio_row['precio'];
     }
-    
-    $precio = $precio_row['precio'];
 
     $usuario_id = $_SESSION['usuario_id'];
 

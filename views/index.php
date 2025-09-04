@@ -38,36 +38,123 @@ $db->desconectar();
     <title>Dulce Tentación</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/sweetalert2.all.min.js"></script>
+    <style>
+        /* Contenedor principal */
+        .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: .75rem 1rem;
+        }
+
+        /* Lista de enlaces */
+        .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1rem;             /* separa elementos */
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        }
+
+        /* Alineación vertical de iconos en links */
+        .nav-links li a {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        text-decoration: none;
+        }
+
+        /* ---------- Carrito ---------- */
+        .cart-link {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: .35rem .6rem;
+        border-radius: 9999px;
+        transition: background .2s ease, transform .05s ease;
+        }
+        .cart-link:hover { background: rgba(0,0,0,.06); }
+        .cart-link:active { transform: translateY(1px); }
+
+        .cart-icon {
+        width: 28px;          /* ajusta tamaño del ícono */
+        height: 28px;
+        object-fit: contain;
+        display: block;
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); /* hace que “flote” */
+        }
+
+        /* Badge de cantidad */
+        .cart-count {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(45%,-45%);
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 9999px;
+        background: #dc3545;     /* rojo estilo Bootstrap */
+        color: #fff;
+        font-size: .75rem;
+        font-weight: 700;
+        line-height: 20px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(220,53,69,.4);
+        }
+
+        /* Oculta el badge si está vacío (0 o sin texto) */
+        .cart-count:empty { display: none; }
+
+        /* Responsive (si usas menú hamburguesa) */
+        @media (max-width: 992px) {
+        .nav-links { gap: .5rem; }
+        .cart-icon { width: 26px; height: 26px; }
+        }
+
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">
             <img src="../assets/img/Logo.png" alt="Logo Empresa">
-            <a href="index.php"><span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span></a>
+            <a href="index.php">
+            <span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span>
+            </a>
         </div>
+
         <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
         </button>
+
         <ul class="nav-links">
             <?php if (isset($_SESSION['usuario_id'])): ?>
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                    <li><a href="admin/admin.php">Admin</a></li>
-                <?php endif; ?>
-                <li><a href="carrito.php">Carrito <span id="cart-count" class="cart-count"></span></a></li>
-                <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
+            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <li><a href="admin/admin.php">Admin</a></li>
+            <?php endif; ?>
+
+            <li>
+                <a href="carrito.php" class="cart-link" aria-label="Ir al carrito">
+                <img class="cart-icon" src="../assets/img/carrito.png" alt="Carrito">
+                <span id="cart-count" class="cart-count" aria-live="polite"></span>
+                </a>
+            </li>
+
+            <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
             <?php else: ?>
-                <li><a href="login.php">Iniciar Sesión</a></li>
-                <li><a href="registro.php">Registrarse</a></li>
+            <li><a href="login.php">Iniciar Sesión</a></li>
+            <li><a href="registro.php">Registrarse</a></li>
             <?php endif; ?>
         </ul>
     </nav>
 
+
     <header class="hero innovador" style="background: url('../assets/img/fondo.png') center center / cover no-repeat;">
-        <div class="hero-content">
-            <h1>¡Bienvenido a la galeria de galletas!</h1>
-            <p>Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
+        <div class="hero-content bg-dark bg-opacity-50 text-white p-4 rounded">
+            <h1 class="display-4 fw-bold" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.7);">¡Bienvenido a la galeria de galletas!</h1>
+            <p class="lead" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.7);">Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
         </div>
     </header>
 

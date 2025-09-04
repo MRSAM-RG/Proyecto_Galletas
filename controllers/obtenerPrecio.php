@@ -25,15 +25,30 @@ if (!$producto_id || $tamano !== 'normal' || !in_array($presentacion, ['unidad',
 $db = new MySQL();
 $db->conectar();
 
-$stmt = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
-$stmt->bind_param('iss', $producto_id, $tamano, $presentacion);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($row = $result->fetch_assoc()) {
-    echo json_encode(['success' => true, 'precio' => $row['precio']]);
+// Si es paquete mixto, obtener el precio desde la base de datos (el mismo para todos los productos)
+if ($presentacion === 'paquete_mixto') {
+    $stmt = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE presentacion = 'paquete_mixto' LIMIT 1");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        echo json_encode(['success' => true, 'precio' => $row['precio']]);
+    } else {
+        // Si no hay precio de paquete mixto, usar el valor por defecto
+        echo json_encode(['success' => true, 'precio' => 75000]);
+    }
 } else {
-    echo json_encode(['success' => false, 'error' => 'Precio no encontrado']);
+    // Para unidad y paquete3, usar el precio específico del producto
+    $stmt = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE producto_id = ? AND tamano = ? AND presentacion = ?");
+    $stmt->bind_param('iss', $producto_id, $tamano, $presentacion);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        echo json_encode(['success' => true, 'precio' => $row['precio']]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Precio no encontrado']);
+    }
 }
 
 $db->desconectar(); 

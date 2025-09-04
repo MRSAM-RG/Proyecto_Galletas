@@ -25,6 +25,15 @@ while ($row = $result_precios->fetch_assoc()) {
     $precios[$row['producto_id']][$row['tamano']][$row['presentacion']] = $row['precio'];
 }
 
+// Obtener el precio actual del paquete mixto (tomar el primero que encontremos como referencia)
+$precio_mixto_actual = 75000; // valor por defecto
+$stmt_mixto = $db->conexion->prepare("SELECT precio FROM precios_productos WHERE presentacion = 'paquete_mixto' LIMIT 1");
+$stmt_mixto->execute();
+$result_mixto = $stmt_mixto->get_result();
+if ($row_mixto = $result_mixto->fetch_assoc()) {
+    $precio_mixto_actual = $row_mixto['precio'];
+}
+
 $db->desconectar();
 ?>
 <!DOCTYPE html>
@@ -114,13 +123,24 @@ $db->desconectar();
         </button>
         <ul class="nav-links">
             <li><a href="admin.php">Admin</a></li>
-            <li><a href="../carrito.php">Carrito <span id="cart-count" class="cart-count"></span></a></li>
+            <li><a href="../carrito.php"><img src="../assets/img/carrito.png" alt="Carrito"> <span id="cart-count" class="cart-count"></span></a></li>
             <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
         </ul>
     </nav>
     <div class="login-container" style="max-width:900px;">
         <h1>Gestión de Productos</h1>
         <a href="../admin/agregarProducto.php" class="btn" style="margin-bottom:1.5rem;display:inline-block;">+ Agregar Producto</a>
+        
+        <!-- Sección para editar precio del paquete mixto -->
+        <div style="background:#f8f9fa;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #dee2e6;">
+            <h3 style="color:#a14a7f;margin-bottom:1rem;">Precio del Paquete Mixto</h3>
+            <form style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;" onsubmit="actualizarPrecioMixto(event)">
+                <label style="font-weight:500;">Precio actual:</label>
+                <input type="number" id="precio_mixto" step="0.01" min="0" value="<?= $precio_mixto_actual ?>" style="padding:0.5rem;border:1px solid #ccc;border-radius:4px;width:120px;" required>
+                <button type="submit" class="btn" style="background:#a14a7f;color:white;padding:0.5rem 1rem;border:none;border-radius:4px;cursor:pointer;">Actualizar</button>
+                <small style="color:#666;">Este precio se aplicará a todos los productos</small>
+            </form>
+        </div>
         <?php if (isset($_GET['error'])): ?>
             <div class="error"><?php echo htmlspecialchars($_GET['error']); ?></div>
         <?php endif; ?>
@@ -151,7 +171,7 @@ $db->desconectar();
                         <td><?php echo htmlspecialchars_decode($producto['descripcion']); ?></td>
                         <td>$<?= isset($precios[$producto['id']]['normal']['unidad']) ? number_format($precios[$producto['id']]['normal']['unidad'], 0, ',', '.') : 'N/A' ?></td>
                         <td>$<?= isset($precios[$producto['id']]['normal']['paquete3']) ? number_format($precios[$producto['id']]['normal']['paquete3'], 0, ',', '.') : 'N/A' ?></td>
-                        <td>$<?= isset($precios[$producto['id']]['normal']['paquete_mixto']) ? number_format($precios[$producto['id']]['normal']['paquete_mixto'], 0, ',', '.') : 'N/A' ?></td>
+                        <td>$<?= number_format($precio_mixto_actual, 0, ',', '.') ?> <small style="color:#a14a7f;">(Global)</small></td>
                         <td>
                             <span class="estado-badge <?php echo $producto['estado'] === 'activo' ? 'activo' : 'inactivo'; ?>">
                                 <?php echo ucfirst($producto['estado']); ?>
@@ -204,6 +224,48 @@ $db->desconectar();
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = `../../controllers/reactivarProducto.php?id=${id}`;
+            }
+        });
+    }
+
+    function actualizarPrecioMixto(event) {
+        event.preventDefault();
+        const precio = document.getElementById('precio_mixto').value;
+        
+        if (precio <= 0) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El precio debe ser mayor a 0',
+                icon: 'error',
+                confirmButtonColor: '#a14a7f'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Actualizar precio?',
+            text: `El precio del paquete mixto se cambiará a $${new Intl.NumberFormat('es-CO').format(precio)} para todos los productos`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#a14a7f',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, actualizar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Crear un formulario oculto para enviar la actualización
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '../../controllers/actualizarPrecioMixto.php';
+                
+                const inputPrecio = document.createElement('input');
+                inputPrecio.type = 'hidden';
+                inputPrecio.name = 'precio_mixto';
+                inputPrecio.value = precio;
+                
+                form.appendChild(inputPrecio);
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     }
