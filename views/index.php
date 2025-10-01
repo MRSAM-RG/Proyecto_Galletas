@@ -165,7 +165,7 @@ $db->desconectar();
 
     <footer class="footer">
         <div class="social-icons">
-            <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/instagram.png" alt="Instagram"></a>
+            <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/Instagram.png" alt="Instagram"></a>
             <a href="https://wa.me/573173953818"><img src="../assets/img/whatsapp.png" alt="WhatsApp"></a>
         </div>
         <p>© 2025 Dulce Tentación. Todos los derechos reservados.</p>
