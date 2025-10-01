@@ -1,5 +1,4 @@
 <?php
-
 require_once '../config/security.php';
 require_once '../models/MySQL.php';
 require_once '../models/QueryManager.php';
@@ -13,23 +12,12 @@ $queryManager = new QueryManager($db);
 
 // Obtener productos
 $result = $queryManager->getAllProducts();
-
 if (!$result) {
     die("Error al obtener los productos");
 }
 
-// Obtener precios para todos los productos
-$precios = [];
-$stmt = $db->conexion->prepare("SELECT producto_id, tamano, precio FROM precios_productos WHERE presentacion = 'unidad'");
-$stmt->execute();
-$result_precios = $stmt->get_result();
-while ($row = $result_precios->fetch_assoc()) {
-    $precios[$row['producto_id']][$row['tamano']] = $row['precio'];
-}
-
 $db->desconectar();
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -39,81 +27,18 @@ $db->desconectar();
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/sweetalert2.all.min.js"></script>
     <style>
-        /* Contenedor principal */
-        .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        padding: .75rem 1rem;
-        }
+        .navbar { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.75rem 1rem; }
+        .nav-links { display:flex; align-items:center; gap:1rem; list-style:none; margin:0; padding:0; }
+        .nav-links li a { display:inline-flex; align-items:center; gap:.4rem; text-decoration:none; }
+        .cart-link { position:relative; display:inline-flex; align-items:center; padding:.35rem .6rem; border-radius:9999px; transition:background .2s ease, transform .05s ease; }
+        .cart-link:hover { background:rgba(0,0,0,.06); } .cart-link:active{ transform:translateY(1px); }
+        .cart-icon { width:28px; height:28px; object-fit:contain; display:block; filter:drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
+        .cart-count { position:absolute; top:0; right:0; transform:translate(45%,-45%); min-width:20px; height:20px; padding:0 6px; border-radius:9999px; background:#dc3545; color:#fff; font-size:.75rem; font-weight:700; line-height:20px; text-align:center; box-shadow:0 2px 6px rgba(220,53,69,.4); }
+        .cart-count:empty { display:none; }
+        @media (max-width: 992px) { .nav-links{gap:.5rem;} .cart-icon{width:26px;height:26px;} }
 
-        /* Lista de enlaces */
-        .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 1rem;             /* separa elementos */
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        }
-
-        /* Alineación vertical de iconos en links */
-        .nav-links li a {
-        display: inline-flex;
-        align-items: center;
-        gap: .4rem;
-        text-decoration: none;
-        }
-
-        /* ---------- Carrito ---------- */
-        .cart-link {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        padding: .35rem .6rem;
-        border-radius: 9999px;
-        transition: background .2s ease, transform .05s ease;
-        }
-        .cart-link:hover { background: rgba(0,0,0,.06); }
-        .cart-link:active { transform: translateY(1px); }
-
-        .cart-icon {
-        width: 28px;          /* ajusta tamaño del ícono */
-        height: 28px;
-        object-fit: contain;
-        display: block;
-        filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); /* hace que “flote” */
-        }
-
-        /* Badge de cantidad */
-        .cart-count {
-        position: absolute;
-        top: 0;
-        right: 0;
-        transform: translate(45%,-45%);
-        min-width: 20px;
-        height: 20px;
-        padding: 0 6px;
-        border-radius: 9999px;
-        background: #dc3545;     /* rojo estilo Bootstrap */
-        color: #fff;
-        font-size: .75rem;
-        font-weight: 700;
-        line-height: 20px;
-        text-align: center;
-        box-shadow: 0 2px 6px rgba(220,53,69,.4);
-        }
-
-        /* Oculta el badge si está vacío (0 o sin texto) */
-        .cart-count:empty { display: none; }
-
-        /* Responsive (si usas menú hamburguesa) */
-        @media (max-width: 992px) {
-        .nav-links { gap: .5rem; }
-        .cart-icon { width: 26px; height: 26px; }
-        }
-
+        .precio { font-weight:700; color:#f2b21b; }
+        .product-card .precio strong { color:#f2b21b; }
     </style>
 </head>
 <body>
@@ -121,7 +46,7 @@ $db->desconectar();
         <div class="logo">
             <img src="../assets/img/Logo.png" alt="Logo Empresa">
             <a href="index.php">
-            <span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span>
+                <span style="color:#ff92b2;font-size:1.5rem;font-weight:bold;">Dulce Tentación</span>
             </a>
         </div>
 
@@ -131,30 +56,27 @@ $db->desconectar();
 
         <ul class="nav-links">
             <?php if (isset($_SESSION['usuario_id'])): ?>
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <li><a href="admin/admin.php">Admin</a></li>
-            <?php endif; ?>
-
-            <li>
-                <a href="carrito.php" class="cart-link" aria-label="Ir al carrito">
-                <img class="cart-icon" src="../assets/img/carrito.png" alt="Carrito">
-                <span id="cart-count" class="cart-count" aria-live="polite"></span>
-                </a>
-            </li>
-
-            <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
+                <?php endif; ?>
+                <li>
+                    <a href="carrito.php" class="cart-link" aria-label="Ir al carrito">
+                        <img class="cart-icon" src="../assets/img/carrito.png" alt="Carrito">
+                        <span id="cart-count" class="cart-count" aria-live="polite"></span>
+                    </a>
+                </li>
+                <li><a href="../controllers/logout.php">Cerrar Sesión</a></li>
             <?php else: ?>
-            <li><a href="login.php">Iniciar Sesión</a></li>
-            <li><a href="registro.php">Registrarse</a></li>
+                <li><a href="login.php">Iniciar Sesión</a></li>
+                <li><a href="registro.php">Registrarse</a></li>
             <?php endif; ?>
         </ul>
     </nav>
 
-
-    <header class="hero innovador" style="background: url('../assets/img/fondo.png') center center / cover no-repeat;">
+    <header class="hero innovador" style="background:url('../assets/img/fondo.png') center/cover no-repeat;">
         <div class="hero-content bg-dark bg-opacity-50 text-white p-4 rounded">
-            <h1 class="display-4 fw-bold" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.7);">¡Bienvenido a la galeria de galletas!</h1>
-            <p class="lead" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.7);">Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
+            <h1 class="display-4 fw-bold" style="text-shadow:2px 2px 6px rgba(0,0,0,0.7);">¡Bienvenido a la galería de galletas!</h1>
+            <p class="lead" style="text-shadow:2px 2px 6px rgba(0,0,0,1);">Descubre nuestras deliciosas galletas artesanales, hechas con amor y los mejores ingredientes.</p>
         </div>
     </header>
 
@@ -164,23 +86,14 @@ $db->desconectar();
                 <div style="display:flex;flex-wrap:wrap;gap:2rem;justify-content:center;margin-bottom:2.5rem;">
                     <div style="background:#fff;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,0.08);padding:2rem 1.5rem;max-width:400px;flex:1 1 300px;min-width:260px;">
                         <h2 style="color:#c2185b;margin-bottom:1rem;">Misión</h2>
-                        <p style="color:#333;font-size:1.05rem;">Ofrecer al consumidor galletas de la máxima
-                            calidad, con la máxima frescura y a
-                            precios justos. Para conseguirlo con rentabilidad,
-                            trabajamos en la innovación en producto y la
-                            búsqueda de la eficiencia operativa, para así
-                            poder generar valor constante y un crecimiento
-                            sostenible.</p>
+                        <p>Ofrecer al consumidor galletas de la máxima calidad y frescura a precios justos, innovando en producto y eficiencia operativa.</p>
                     </div>
                     <div style="background:#fff;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,0.08);padding:2rem 1.5rem;max-width:400px;flex:1 1 300px;min-width:260px;">
                         <h2 style="color:#c2185b;margin-bottom:1rem;">Visión</h2>
-                        <p style="color:#333;font-size:1.05rem;">Ser el referente a nivel nacional en galletas
-                        horneados, cuyo reconocimiento provenga
-                        tanto de consumidores, proveedores y la sociedad
-                        y velando por una cadena alimentaria
-                        sostenible.</p>
+                        <p>Ser el referente nacional en galletas horneadas, reconocido por consumidores y proveedores, con una cadena sostenible.</p>
                     </div>
                 </div>
+
                 <h2>Nuestros Productos</h2>
                 <div class="product-grid">
                     <?php while ($producto = $result->fetch_assoc()): ?>
@@ -188,21 +101,25 @@ $db->desconectar();
                             <img src="../assets/img/<?php echo htmlspecialchars($producto['imagen']); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" style="width:400px;height:400px;object-fit:cover;display:block">
                             <h3><?php echo htmlspecialchars_decode($producto['nombre']); ?></h3>
                             <p><?php echo htmlspecialchars_decode($producto['descripcion']); ?></p>
-                            <div class="precios-container">
-                                <p class="precio">Normal: <span id="precio-<?= $producto['id'] ?>">$<?= isset($precios[$producto['id']]['normal']) ? number_format($precios[$producto['id']]['normal'], 0, ',', '.') : 'N/A' ?></span></p>
-                            </div>
+
+                            <p class="precio">
+                                <strong>Precio:</strong>
+                                <span id="precio-<?php echo $producto['id']; ?>">Cargando...</span>
+                            </p>
+
                             <?php if (isset($_SESSION['usuario_id'])): ?>
-                                <form class="add-cart-form" action="../controllers/carrito.php" method="POST" style="margin-top: 1rem;">
-                                    <input type="hidden" name="producto_id" value="<?php echo $producto['id']; ?>">
-                                    <label style="font-size:0.95rem;">Presentación:</label>
-                                    <select name="presentacion" style="margin:0 0.5rem 0 0.5rem;" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
-                                        <option value="unidad">Unidad</option>
-                                        <option value="paquete3">Paquete de 3</option>
-                                        <option value="paquete_mixto">Paquete Mixto</option>
-                                    </select>
-                                    <input type="number" name="cantidad" value="1" min="1" style="width: 60px; margin-right: 0.5rem;">
-                                    <button type="submit">Agregar al Carrito</button>
-                                </form>
+                            <form class="add-cart-form" action="../controllers/carrito.php" method="POST" style="margin-top:1rem;">
+                                <input type="hidden" name="producto_id" value="<?php echo $producto['id']; ?>">
+                                <label style="font-size:0.95rem;">Presentación:</label>
+                                <select name="presentacion" style="margin:0 0.5rem" onchange="actualizarPrecio(<?php echo $producto['id']; ?>)">
+                                    <option value="paquete6">Paquete de 6</option>
+                                    <option value="paquete9" selected>Paquete de 9</option>
+                                    <option value="paquete12">Paquete de 12</option>
+                                    <option value="paquete_mixto">Paquete Mixto</option>
+                                </select>
+                                <input type="number" name="cantidad" value="1" min="1" style="width:60px;margin-right:.5rem;">
+                                <button type="submit">Agregar al Carrito</button>
+                            </form>
                             <?php endif; ?>
                         </div>
                     <?php endwhile; ?>
@@ -210,30 +127,32 @@ $db->desconectar();
             </div>
         </section>
     </main>
+
     <section class="contact-section">
-        <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
-            <h2 style="text-align: center; color: #c2185b; margin-bottom: 2rem;">Contáctanos</h2>
-            <form id="contactForm" action="../controllers/contact.php" method="POST" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
-                <div style="margin-bottom: 1rem;">
-                    <label for="name" style="display: block; margin-bottom: 0.5rem; color: #333;">Nombre</label>
-                    <input type="text" id="name" name="name" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+        <div style="max-width:800px;margin:0 auto;padding:0 1rem;">
+            <h2 style="text-align:center;color:#c2185b;margin-bottom:2rem;">Contáctanos</h2>
+            <form id="contactForm" action="../controllers/contact.php" method="POST" style="background:#fff;padding:2rem;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.08);">
+                <div style="margin-bottom:1rem;">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" name="name" required>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label for="email" style="display: block; margin-bottom: 0.5rem; color: #333;">Email</label>
-                    <input type="email" id="email" name="email" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+                <div style="margin-bottom:1rem;">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label for="subject" style="display: block; margin-bottom: 0.5rem; color: #333;">Asunto</label>
-                    <input type="text" id="subject" name="subject" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px;">
+                <div style="margin-bottom:1rem;">
+                    <label for="subject">Asunto</label>
+                    <input type="text" id="subject" name="subject" required>
                 </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="message" style="display: block; margin-bottom: 0.5rem; color: #333;">Mensaje</label>
-                    <textarea id="message" name="message" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; min-height: 150px;"></textarea>
+                <div style="margin-bottom:1.5rem;">
+                    <label for="message">Mensaje</label>
+                    <textarea id="message" name="message" required style="min-height:150px;"></textarea>
                 </div>
-                <button type="submit" style="background: #c2185b; color: white; padding: 1rem 2rem; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1rem;">Enviar Mensaje</button>
+                <button type="submit" style="background:#c2185b;color:#fff;padding:1rem 2rem;border:none;border-radius:6px;cursor:pointer;width:100%;font-size:1.1rem;">Enviar Mensaje</button>
             </form>
         </div>
     </section>
+
     <footer class="footer">
         <div class="social-icons">
             <a href="https://www.instagram.com/mariana_go08?igsh=MW40d2JnZjZ2M3E3"><img src="../assets/img/instagram.png" alt="Instagram"></a>
@@ -242,13 +161,15 @@ $db->desconectar();
         <p>© 2025 Dulce Tentación. Todos los derechos reservados.</p>
         <p>Iconos de <a href="https://icons8.com" target="_blank">Icons8</a></p>
     </footer>
+
     <div id="toast" class="toast" style="display:none;position:fixed;top:90px;right:30px;z-index:9999;background:#a14a7f;color:#fff;padding:16px 28px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);font-size:1.1rem;">Producto agregado al carrito</div>
-</body>
+
 <script>
 document.getElementById('hamburger-btn').addEventListener('click', function() {
     document.querySelector('.nav-links').classList.toggle('open');
 });
-// Mostrar toast si el producto fue agregado
+
+// Toast si el producto fue agregado
 if (window.location.search.includes('added=1')) {
     var toast = document.getElementById('toast');
     if (toast) {
@@ -256,7 +177,8 @@ if (window.location.search.includes('added=1')) {
         setTimeout(() => { toast.style.display = 'none'; }, 2500);
     }
 }
-// Actualiza el contador del carrito
+
+// Contador del carrito
 function updateCartCount() {
     var cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
@@ -267,65 +189,30 @@ function updateCartCount() {
         });
 }
 updateCartCount();
-// AJAX para agregar al carrito sin recargar
-if (document.querySelectorAll('.add-cart-form').length) {
-    document.querySelectorAll('.add-cart-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(form);
-            fetch('../controllers/carrito.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    var toast = document.getElementById('toast');
-                    if (toast) {
-                        toast.style.display = 'block';
-                        setTimeout(() => { 
-                            toast.style.display = 'none';
-                            window.location.reload();
-                        }, 1200);
-                    } else {
-                        window.location.reload();
-                    }
-                    updateCartCount();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    Swal.fire({
-                        icon: data.limit_exceeded ? 'warning' : 'error',
-                        title: data.limit_exceeded ? 'Límite de galletas excedido' : '¡Error!',
-                        text: data.error || 'No hay suficiente stock disponible para este producto.',
-                        confirmButtonColor: '#a14a7f'
-                    });
-                }
-            })
-            .catch(() => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo un error al agregar el producto al carrito.',
-                    confirmButtonColor: '#a14a7f'
-                });
-            });
-        });
-    });
-}
+
+// ---- Precio dinámico por tarjeta ----
 function actualizarPrecio(productoId) {
-    const presentacion = document.querySelector(`.product-card input[name='producto_id'][value='${productoId}']`).closest('.product-card').querySelector("select[name='presentacion']").value;
+    const card = document.querySelector(`.product-card input[name='producto_id'][value='${productoId}']`).closest('.product-card');
+    const presentacion = card.querySelector("select[name='presentacion']").value;
+
     fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=normal&presentacion=${presentacion}`)
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
+            const span = document.getElementById(`precio-${productoId}`);
+            if (!span) return;
             if (data.success) {
-                document.getElementById(`precio-${productoId}`).textContent = '$' + new Intl.NumberFormat('es-CO').format(data.precio);
+                span.textContent = '$' + new Intl.NumberFormat('es-CO').format(data.precio);
+            } else {
+                span.textContent = 'No disponible';
             }
+        })
+        .catch(() => {
+            const span = document.getElementById(`precio-${productoId}`);
+            if (span) span.textContent = 'Error';
         });
 }
-// Llamar a actualizarPrecio al cargar la página para cada producto
+
+// Cargar precio al iniciar
 window.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.product-card').forEach(card => {
         const id = card.querySelector('input[name="producto_id"]').value;
@@ -333,46 +220,24 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Manejo del formulario de contacto
+// Contacto (igual que antes)
 document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
     const formData = new FormData(this);
-    
-    fetch('../controllers/contact.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        if (data.includes('Mensaje enviado correctamente')) {
-            Swal.fire({
-                title: '¡Mensaje Enviado!',
-                text: 'Gracias por contactarnos. Te responderemos pronto.',
-                icon: 'success',
-                confirmButtonColor: '#a14a7f'
-            }).then(() => {
-                this.reset();
-            });
-        } else {
-            Swal.fire({
-                title: 'Error',
-                text: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente.',
-                icon: 'error',
-                confirmButtonColor: '#a14a7f'
-            });
-        }
-    })
-    .catch(error => {
-        Swal.fire({
-            title: 'Error',
-            text: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente.',
-            icon: 'error',
-            confirmButtonColor: '#a14a7f'
-        });
-    });
+    fetch('../controllers/contact.php', { method: 'POST', body: formData })
+      .then(r => r.text())
+      .then(txt => {
+          if (txt.includes('Mensaje enviado correctamente')) {
+              Swal.fire({ title: '¡Mensaje Enviado!', text: 'Gracias por contactarnos. Te responderemos pronto.', icon: 'success', confirmButtonColor: '#a14a7f' })
+                .then(() => this.reset());
+          } else {
+              Swal.fire({ title: 'Error', text: 'Hubo un error al enviar el mensaje.', icon: 'error', confirmButtonColor: '#a14a7f' });
+          }
+      })
+      .catch(() => Swal.fire({ title: 'Error', text: 'Hubo un error al enviar el mensaje.', icon: 'error', confirmButtonColor: '#a14a7f' }));
 });
 </script>
+
 <?php if (isset($_GET['stock_error'])): ?>
 <script>
 Swal.fire({
@@ -383,4 +248,5 @@ Swal.fire({
 });
 </script>
 <?php endif; ?>
+</body>
 </html>

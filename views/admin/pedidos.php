@@ -329,7 +329,6 @@ $db->desconectar();
     </button>
     <ul class="nav-links">
         <li><a href="admin.php">Admin</a></li>
-        <li><a href="../carrito.php"><img src="../assets/img/carrito.png" alt="Carrito"></a></li>
         <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
     </ul>
 </nav>
@@ -427,13 +426,13 @@ $db->desconectar();
                                     $total = 0;
                                     if (isset($mapa_detalles[$pedido['id']])):
                                         foreach ($mapa_detalles[$pedido['id']] as $detalle):
-                                            $subtotal = $detalle['cantidad'] * $detalle['precio'];
+                                            $subtotal = $detalle['cantidad'] * $detalle['precio_unitario'];
                                             $total += $subtotal;
                                     ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars_decode($detalle['producto']); ?></td>
                                             <td><?php echo $detalle['cantidad']; ?></td>
-                                            <td>$<?php echo number_format($detalle['precio'], 0, ',', '.'); ?></td>
+                                            <td>$<?php echo number_format($detalle['precio_unitario'], 0, ',', '.'); ?></td>
                                             <td><?php echo htmlspecialchars($detalle['tamano']); ?></td>
                                             <td><?php echo htmlspecialchars($detalle['presentacion'] === 'unidad' ? 'Unidad' : 'Paquete de 3'); ?></td>
                                             <td>$<?php echo number_format($subtotal, 0, ',', '.'); ?></td>

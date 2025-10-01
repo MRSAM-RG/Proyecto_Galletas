@@ -29,7 +29,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
         </button>
         <ul class="nav-links">
             <li><a href="admin.php">Admin</a></li>
-            <li><a href="../carrito.php"><img src="../assets/img/carrito.png" alt="Carrito"> <span id="cart-count" class="cart-count"></span></a></li>
             <li><a href="../../controllers/logout.php">Cerrar Sesión</a></li>
         </ul>
     </nav>
