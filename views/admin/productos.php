@@ -218,11 +218,7 @@ $db->desconectar();
                                                         if ( precio <= 0 ) return Swal.fire( {
                                                             title:'Error', text:'El precio debe ser mayor a 0', icon:'error', confirmButtonColor:'#a14a7f'}
                                                         );
-                                                        Swal.fire( {
-                                                            title:'¿Actualizar precio?', text:`Se cambiará a $$ {
-                                                                new Intl.NumberFormat( 'es-CO' ).format( precio )}
-                                                                `, icon:'question', showCancelButton:true, confirmButtonColor:'#a14a7f', cancelButtonColor:'#6c757d', confirmButtonText:'Sí, actualizar', cancelButtonText:'Cancelar'}
-                                                            )
+                                                        Swal.fire( {title:'¿Actualizar precio?', icon:'question', showCancelButton:true, confirmButtonColor:'#a14a7f', cancelButtonColor:'#6c757d', confirmButtonText:'Sí, actualizar', cancelButtonText:'Cancelar'})
                                                             .then( r=> {
                                                                 if ( r.isConfirmed ) {
                                                                     // Tu controlador debe setear el global en precios_productos ( primer registro mixto o todos los mixtos )
