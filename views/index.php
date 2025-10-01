@@ -86,11 +86,21 @@ $db->desconectar();
                 <div style="display:flex;flex-wrap:wrap;gap:2rem;justify-content:center;margin-bottom:2.5rem;">
                     <div style="background:#fff;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,0.08);padding:2rem 1.5rem;max-width:400px;flex:1 1 300px;min-width:260px;">
                         <h2 style="color:#c2185b;margin-bottom:1rem;">Misión</h2>
-                        <p>Ofrecer al consumidor galletas de la máxima calidad y frescura a precios justos, innovando en producto y eficiencia operativa.</p>
+                        <p>Ofrecer al consumidor galletas de la máxima
+                            calidad, con la máxima frescura y a
+                            precios justos. Para conseguirlo con rentabilidad,
+                            trabajamos en la innovación en producto y la
+                            búsqueda de la eficiencia operativa, para así
+                            poder generar valor constante y un crecimiento
+                            sostenible.</p>
                     </div>
                     <div style="background:#fff;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,0.08);padding:2rem 1.5rem;max-width:400px;flex:1 1 300px;min-width:260px;">
                         <h2 style="color:#c2185b;margin-bottom:1rem;">Visión</h2>
-                        <p>Ser el referente nacional en galletas horneadas, reconocido por consumidores y proveedores, con una cadena sostenible.</p>
+                        <p>Ser el referente a nivel nacional en galletas
+                        horneados, cuyo reconocimiento provenga
+                        tanto de consumidores, proveedores y la sociedad
+                        y velando por una cadena alimentaria
+                        sostenible.</p>
                     </div>
                 </div>
 
@@ -192,32 +202,36 @@ updateCartCount();
 
 // ---- Precio dinámico por tarjeta ----
 function actualizarPrecio(productoId) {
-    const card = document.querySelector(`.product-card input[name='producto_id'][value='${productoId}']`).closest('.product-card');
-    const presentacion = card.querySelector("select[name='presentacion']").value;
+  // Busca la card por el span del precio
+  const span = document.getElementById(`precio-${productoId}`);
+  const card = span ? span.closest('.product-card') : null;
 
-    fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=normal&presentacion=${presentacion}`)
-        .then(r => r.json())
-        .then(data => {
-            const span = document.getElementById(`precio-${productoId}`);
-            if (!span) return;
-            if (data.success) {
-                span.textContent = '$' + new Intl.NumberFormat('es-CO').format(data.precio);
-            } else {
-                span.textContent = 'No disponible';
-            }
-        })
-        .catch(() => {
-            const span = document.getElementById(`precio-${productoId}`);
-            if (span) span.textContent = 'Error';
-        });
+  // Si hay <select>, úsalo; si no, usa 'paquete9' por defecto
+  let presentacion = 'paquete9';
+  if (card) {
+    const sel = card.querySelector('select[name="presentacion"]');
+    if (sel) presentacion = sel.value;
+  }
+
+  fetch(`../controllers/obtenerPrecio.php?producto_id=${productoId}&tamano=normal&presentacion=${encodeURIComponent(presentacion)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!span) return;
+      if (data.success) {
+        span.textContent = '$' + new Intl.NumberFormat('es-CO').format(data.precio);
+      } else {
+        span.textContent = 'No disponible';
+      }
+    })
+    .catch(() => { if (span) span.textContent = 'Error'; });
 }
 
 // Cargar precio al iniciar
-window.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.product-card').forEach(card => {
-        const id = card.querySelector('input[name="producto_id"]').value;
-        actualizarPrecio(id);
-    });
+window.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('span[id^="precio-"]').forEach(s => {
+    const id = s.id.replace('precio-','');
+    actualizarPrecio(id);
+  });
 });
 
 // Contacto (igual que antes)
